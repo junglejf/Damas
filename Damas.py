@@ -1,128 +1,162 @@
-from cmath import rect
-from textwrap import fill
-
 import pygame
 
+pygame.init()
 
-pygame.init()#inica o jogo
+LARGURA = 640
+ALTURA = 640
 
-largura_tela = 660
-altura_tela = 660
+BEGE = (238,238,210)
+PRETO = (0, 0, 0)
+BRANCO = (255, 255, 255)
+CINZA = (100, 100, 100)
+VERDE_ESCURO = (118,150,86)
+YELLOW = (0, 255, 0)
+VERMELHO_CLARO = (255, 0, 0)
+AZUL = (0, 0, 255)
+COR_FUNDO = (54, 54, 54)
+COR_TAB = (0, 31, 0)
+YELLOW = (255,215,0)
+CINZA = (222, 235, 235)
+MARROM = (235,199,158)
+CORAL = (240,128,128)
+VERDE_CLARO = (0, 255, 0)
+TAMANHO_QUADRADO = 80
+TAMANHO_DAMA = 34
+TAMANHO_RAINHA = 17
 
-black = (0,0,0)
-white = (255,255,255)
-red = (255,0,0)
-red2 = (255,100,0)
 
-gameDisplay = pygame.display.set_mode((largura_tela,altura_tela))
-pygame.display.set_caption(' Damas ' )
+tela = pygame.display.set_mode((640, 640))
 clock = pygame.time.Clock()
 
-#Quadrado
-size = 80
 
-#CORES
-yellow = (255,215,0)
-cinza = (239, 235, 235)
-blue = (100,149,237)
-coral = (240,128,128)
-#Bordas
+# Classe principal
 
-casas = 8
-gameDisplay.fill(cinza)
-bordaexterna = 10
+class Jogo:
+    # Classe para tomar conta do estado do jogo
+    def __init__(self):
+        self.estado = 'jogando'
+        self.turno = 1
+        self.jogadores = ('x', 'o')
+        self.cedula_selecionada = None
+        self.pulando = False
+        self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
+                          ['-', 'x', '-', 'x', '-', 'x', '-', 'x'],
+                          ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
+                          ['-', '-', '-', '-', '-', '-', '-', '-'],
+                          ['-', '-', '-', '-', '-', '-', '-', '-'],
+                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o'],
+                          ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
+                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
 
-def desenha_tabuleiro(tabuleiro):
-    for i in range(0,tabuleiro.dimensao):
-        for z in range(0,tabuleiro.dimensao):
-            pygame.draw.rect(gameDisplay, tab[i][z].cor,[tab[i][z].tamanho * z + bordaexterna, tab[i][z].tamanho * i + bordaexterna, tab[i][z].tamanho, tab[i][z].tamanho])
-    pygame.draw.rect(gameDisplay,black,[bordaexterna,bordaexterna,casas*size,casas*size],5)
+    def getTabuleiro(self):
+        return self.tabuleiro
 
-def desenha_peca():
-    for i in range(0,3):
-        deslocamento = 0
-        for z in range(0,8,2):
-            if (i % 2 == 0):
-                deslocamento = 80
-            pygame.draw.circle(gameDisplay, coral, [50+(80*z)+deslocamento, 50+(80*i)], int(size / 2 - 10))
-            pygame.draw.circle(gameDisplay, blue, [610 - 80*z - deslocamento, 610 - 80*i], int(size / 2 - 10))
+    def jogadas(self, pos):
+        if self.estado == "jogando":
+            linha, coluna = linha_clicada(pos), coluna_clicada(pos)
+            if self.cedula_selecionada:
+                movimento = self.is_movimento_valido(self.jogadores[self.turno % 2], self.cedula_selecionada, linha,
+                                                     coluna)
+                if movimento[0]:
+                    self.jogar(self.jogadores[self.turno % 2], self.cedula_selecionada, linha, coluna, movimento[1])
 
-    
-class Componente():
-    print(white)
-    def __init__(self, posX , posY, tamanho, cor ):
-        self.posX = posX
-        self.posY = posY
-        self.tamanho = tamanho
-        self.cor = cor
+            else:
+                if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
+                    self.cedula_selecionada = [linha, coluna]
 
-class Quadrado(Componente):
-    def __init__(self, posX, posY, tamanho,cor, ocupado = False, vira_Rainha = False ):
-        Componente.__init__(self, posX, posY, tamanho , cor)
-        self.ocupado = ocupado
-        self.vira_Rainha = vira_Rainha
+    def is_movimento_valido(self,jogador, localizacao_cedula, linha_destino, coluna_destino):
 
-class Peca(Componente):
-    def __init__(self, posX, posY, tamanho, cor, queen, foipulada):
-        Componente.__init__(self, posX, posY, tamanho, cor)
-        self.queen = queen
-        self.foipulada = foipulada
+        matriz = self.getTabuleiro()
+        linha_originaria = localizacao_cedula[0]
+        coluna_originaria = localizacao_cedula[1]
+        if(matriz[linha_destino][coluna_destino] == '-'):
+            return True, None
 
+        return False, None
 
+    def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
+        pass
 
+    def desenha(self):
+        matriz = []
 
+        for i in range(8):
+            if i % 2 == 0:
+                matriz.append(['#', '-', '#', '-', '#', '-', '#', '-'])
+            else:
+                matriz.append(['-', '#', '-', '#', '-', '#', '-', '#'])
 
-
-
-class Tabuleiro:
-    def __init__(self, dimensao,pecas):
-        self.dimensao = dimensao
-        self.pecas = pecas
-
-    def constroitab(self):
-        cnt = 0
-        matriz=[]
-        for i in range(0, self.dimensao):
-            linha = []
-            for z in range(0, self.dimensao):
-                if cnt % 2 == 0:
-                    q = Quadrado(0,0,80, white)
-                    pygame.draw.rect(gameDisplay, q.cor, [q.tamanho * z + bordaexterna, q.tamanho * i + bordaexterna, q.tamanho, q.tamanho])
+        y = 0
+        for l in range(len(matriz)):
+            x = 0
+            for c in range(len(matriz[l])):
+                if matriz[l][c] == '#':
+                    pygame.draw.rect(tela, VERDE_ESCURO, (x, y, TAMANHO_QUADRADO, TAMANHO_QUADRADO))
                 else:
-                    q = Quadrado(0, 0, 80, black)
-                    pygame.draw.rect(gameDisplay, q.cor, [q.tamanho * z + bordaexterna, q.tamanho * i + bordaexterna, q.tamanho, q.tamanho])
-                linha.append(q)
-                cnt += 1
-            cnt -= 1
-            matriz.append(linha)
-        pygame.draw.rect(gameDisplay, black, [bordaexterna, bordaexterna, casas * size, casas * size], 5)
-        return matriz
+                    pygame.draw.rect(tela, BEGE, (x, y, TAMANHO_QUADRADO, TAMANHO_QUADRADO))
+                x += TAMANHO_QUADRADO
+            y += TAMANHO_QUADRADO
 
-crashed = False
+        for l in range(len(self.tabuleiro)):
+            for c in range(len(self.tabuleiro[l])):
+                elemento = self.tabuleiro[l][c]
+                if elemento != '-':
+                    x = int(ALTURA / 8) * c + int(ALTURA / 16)
+                    y = int(ALTURA / 8) * l + int(ALTURA / 16)
 
-
-#desenha_tabuleiro()
-tab = Tabuleiro(8,0)
-board = tab.constroitab()
-desenha_peca()
-l =[]
-
-while not crashed:
-	
-
-	for event in pygame.event.get():
-
-		if (event.type == pygame.QUIT):
-			crashed = True
-		print(event)
+                    if elemento.lower() == 'x':
+                        pygame.draw.circle(tela, PRETO, (x, y), TAMANHO_DAMA, 0)
+                        if elemento == 'X':
+                            pygame.draw.circle(tela, PRETO, (x, y), TAMANHO_RAINHA, 0)
+                            pygame.draw.circle(tela, AZUL, (x, y), int(TAMANHO_RAINHA/2), 0)
+                    else:
+                        pygame.draw.circle(tela, BRANCO, (x, y), TAMANHO_DAMA, 0)
+                        if elemento == 'O':
+                            pygame.draw.circle(tela, PRETO, (x, y),TAMANHO_RAINHA, 0)
+                            pygame.draw.circle(tela, AZUL, (x, y), int(TAMANHO_RAINHA/2), 0)
 
 
-	pygame.display.update() #atualizar o frame do jogo
-	clock.tick(60) #parâmetro define
 
 
-	
+def coluna_clicada(pos):
+    x = pos[0]
+    for i in range(1, 8):
+        if x < i * ALTURA / 8:
+            return i - 1
+    return 7
+
+
+def linha_clicada(pos):
+    y = pos[1]
+    for i in range(1, 8):
+        if y < i * ALTURA / 8:
+            return i - 1
+    return 7
+
+
+
+def loop_jogo():
+    sair = False
+
+    jogo = Jogo()
+
+    while not sair:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                sair = True
+                pygame.quit()
+                quit()
+            if evento.type == pygame.MOUSEBUTTONDOWN:
+                jogo.jogadas(pygame.mouse.get_pos())
+
+        tela.fill(PRETO)
+        jogo.desenha()
+
+        pygame.display.update()
+        clock.tick(60)
+
+
+
+loop_jogo()
 pygame.quit()
 quit()
-
-#modifiquei arquivo
