@@ -12,7 +12,7 @@ altura_tela = 660
 black = (0,0,0)
 white = (255,255,255)
 red = (255,0,0)
-
+red2 = (255,100,0)
 
 gameDisplay = pygame.display.set_mode((largura_tela,altura_tela))
 pygame.display.set_caption(' Damas ' )
@@ -109,7 +109,7 @@ l =[]
 
 while not crashed:
 	
-	#check para eventos de erro
+
 	for event in pygame.event.get():
 
 		if (event.type == pygame.QUIT):
