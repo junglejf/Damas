@@ -697,6 +697,45 @@ def linha_clicada(pos):
             return i - 1
     return 7
 
+# DEFINIR PADRÃO DE TEXTOS NA TELA
+def texto_na_tela(text, font, color):
+	txt = font.render(text, True, color)
+	return txt, txt.get_rect()
+
+def fim_de_jogo(winner):
+	fim = False
+	while not fim:
+		for evento in pygame.event.get():
+			if evento.type == pygame.QUIT:
+				fim = True
+				pygame.quit()
+				quit()
+			if evento.type == pygame.KEYDOWN or evento.type == pygame.MOUSEBUTTONDOWN:
+				fim = True
+
+		tela.fill(AZUL)
+
+		fonte = pygame.font.SysFont('comicsansms', 50)
+
+		surface_texto, rect_texto = None, None
+
+		if winner == "empate":
+			surface_texto, rect_texto = texto_na_tela("EMPATE!", fonte, BRANCO)
+		elif winner == "x":
+			surface_texto, rect_texto = texto_na_tela("PRETO WINS", fonte, PRETO)
+		elif winner == "o":
+			surface_texto, rect_texto = texto_na_tela("BRANCO WINS", fonte, BRANCO)
+
+		rect_texto.center = ((LARGURA / 2), ALTURA / 3)
+		tela.blit(surface_texto, rect_texto)
+
+		fonte = pygame.font.Font(None, 30)
+		voltar = fonte.render('Pressione qualquer tecla para jogar novamente.', False, CORAL)
+
+		tela.blit(voltar, (25, 550))
+
+		pygame.display.update()
+		clock.tick(60)
 
 
 def loop_jogo():
@@ -719,11 +758,11 @@ def loop_jogo():
         vencedor = jogo.verifica_vencedor()
 
         if vencedor is not None:
+            fim_de_jogo(vencedor)
             sair = True
 
         pygame.display.update()
         clock.tick(60)
-
 
 
 loop_jogo()
