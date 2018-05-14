@@ -104,6 +104,9 @@ class Jogo:
         if vencedor != None:
             self.estado = ('game over')
 
+    def proximo_turno(self):
+        self.turno += 1
+
     def desenha(self):
         matriz = []
 
