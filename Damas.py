@@ -155,7 +155,7 @@ class Jogo:
                                 must_action.append([l_x + 1, l_c - 1])
                                 jumped_square.append((l_x, l_c))
 
-		# movimento Rainha
+                                # movimento Rainha
         elif self.tabuleiro[l][c].isupper() and self.tabuleiro[l][c] == jogador.upper() and \
                                 self.turno % 2 == index:
 
