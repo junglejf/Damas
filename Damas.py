@@ -282,9 +282,7 @@ class Jogo:
             self.pulando = True
 
         if (jogador == 'x' and linha_destino == 7) or (jogador == 'o' and linha_destino == 0):
-            if not self.pulando:
-                self.tabuleiro[linha_destino][coluna_destino] = char.upper()
-            elif not self.movimentos_possiveis((linha_destino, coluna_destino))[0]:
+            if not self.movimentos_possiveis((linha_destino, coluna_destino))[0]:
                 self.tabuleiro[linha_destino][coluna_destino] = char.upper()
 
         if pulo:
