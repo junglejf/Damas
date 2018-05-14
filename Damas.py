@@ -75,7 +75,7 @@ class Jogo:
         return False, None
 
     def movimento_obrigatorio(self, tabuleiro):
-        obrigatorios = []
+        must_action = []
         jumped_square = []
 
         l = tabuleiro[0]
@@ -96,7 +96,7 @@ class Jogo:
 
                         if l_x - 1 >= 0 and l_c + 1 <= 7:
                             if self.tabuleiro[l_x - 1][l_c + 1] == '-':
-                                obrigatorios.append([l_x - 1, l_c + 1])
+                                must_action.append([l_x - 1, l_c + 1])
                                 jumped_square.append((l_x, l_c))
                 if c > 0:
                     if self.tabuleiro[l - 1][c - 1].lower() not in array:
@@ -105,7 +105,7 @@ class Jogo:
 
                         if l_x - 1 >= 0 and l_c - 1 >= 0:
                             if self.tabuleiro[l_x - 1][l_c - 1] == '-':
-                                obrigatorios.append([l_x - 1, l_c - 1])
+                                must_action.append([l_x - 1, l_c - 1])
                                 jumped_square.append((l_x, l_c))
             if l < 7:
                 if c < 7:
@@ -115,7 +115,7 @@ class Jogo:
 
                         if l_x + 1 <= 7 and l_c + 1 <= 7:
                             if self.tabuleiro[l_x + 1][l_c + 1] == '-':
-                                obrigatorios.append([l_x + 1, l_c + 1])
+                                must_action.append([l_x + 1, l_c + 1])
                                 jumped_square.append((l_x, l_c))
                 if c > 0:
                     if self.tabuleiro[l + 1][c - 1].lower() not in array:
@@ -124,7 +124,7 @@ class Jogo:
 
                         if l_x + 1 <= 7 and l_c - 1 >= 0:
                             if self.tabuleiro[l_x + 1][l_c - 1] == '-':
-                                obrigatorios.append([l_x + 1, l_c - 1])
+                                must_action.append([l_x + 1, l_c - 1])
                                 jumped_square.append((l_x, l_c))
 
 		# movimento Rainha
@@ -150,7 +150,7 @@ class Jogo:
                                             break
                                         else:
                                             if self.tabuleiro[l_x - 1][l_c - 1] == '-':
-                                                obrigatorios.append([l_x - 1, l_c - 1])
+                                                must_action.append([l_x - 1, l_c - 1])
                                             else:
                                                 break
                                         l_x -= 1
@@ -177,7 +177,7 @@ class Jogo:
                                             break
                                         else:
                                             if self.tabuleiro[l_x - 1][l_c + 1] == '-':
-                                                obrigatorios.append([l_x - 1, l_c + 1])
+                                                must_action.append([l_x - 1, l_c + 1])
                                             else:
                                                 break
                                         l_x -= 1
@@ -204,7 +204,7 @@ class Jogo:
                                             break
                                         else:
                                             if self.tabuleiro[l_x + 1][l_c + 1] == '-':
-                                                obrigatorios.append([l_x + 1, l_c + 1])
+                                                must_action.append([l_x + 1, l_c + 1])
                                             else:
                                                 break
                                         l_x += 1
@@ -231,7 +231,7 @@ class Jogo:
                                             break
                                         else:
                                             if self.tabuleiro[l_x + 1][l_c - 1] == '-':
-                                                obrigatorios.append([l_x + 1, l_c - 1])
+                                                must_action.append([l_x + 1, l_c - 1])
                                             else:
                                                 break
                                         l_x += 1
@@ -240,7 +240,7 @@ class Jogo:
                     movimento_x += 1
                     movimento_y -= 1
 
-        return obrigatorios, jumped_square
+        return must_action, jumped_square
 
     def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
         pass
