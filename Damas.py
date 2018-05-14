@@ -59,6 +59,13 @@ class Jogo:
                                                      coluna)
                 if movimento[0]:
                     self.jogar(self.jogadores[self.turno % 2], self.cedula_selecionada, linha, coluna, movimento[1])
+                elif linha == self.cedula_selecionada[0] and coluna == self.cedula_selecionada[1]:
+                    movs = self.movimento_obrigatorio(self.cedula_selecionada)
+                    if movs[0] == []:
+                        if self.pulando:
+                            self.pulando = False
+                            self.proximo_turno()
+                    self.cedula_selecionada = None
 
             else:
                 if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
@@ -66,10 +73,31 @@ class Jogo:
 
     def is_movimento_valido(self,jogador, localizacao_cedula, linha_destino, coluna_destino):
 
-        matriz = self.getTabuleiro()
         linha_originaria = localizacao_cedula[0]
         coluna_originaria = localizacao_cedula[1]
-        if(matriz[linha_destino][coluna_destino] == '-'):
+
+        obrigatorios = self.todos_obrigatorios()
+
+        if obrigatorios != {}:
+            if (linha_originaria, coluna_originaria) not in obrigatorios:
+                return False, None
+            elif [linha_destino, coluna_destino] not in obrigatorios[(linha_originaria, coluna_originaria)]:
+                return False, None
+
+        movimento, pulo = self.movimentos_possiveis(localizacao_cedula)
+
+        if [linha_destino, coluna_destino] in movimento:
+            if pulo:
+                if len(pulo) == 1:
+                    return True, pulo[0]
+                else:
+                    for i in range(len(pulo)):
+                        if abs(pulo[i][0] - linha_destino) == 1 and abs(pulo[i][1] - coluna_destino) == 1:
+                            return True, pulo[i]
+
+            if self.pulando:
+                return False, None
+
             return True, None
 
         return False, None
@@ -107,6 +135,303 @@ class Jogo:
     def proximo_turno(self):
         self.turno += 1
 
+    def existe_possivel(self):
+        for l in range(len(self.tabuleiro)):
+            for c in range(len(self.tabuleiro[l])):
+                if self.movimentos_possiveis((l, c))[0]:
+                    return True
+        return False
+
+	#MOSTRA OS MOVIMENTOS POSSIVEIS DE UMA PECA SELECIONADA
+    def movimentos_possiveis(self, localizacao_cedula):
+        movimentos, pulos = self.movimento_obrigatorio(localizacao_cedula)
+
+        if movimentos == []:
+            linha_atual = localizacao_cedula[0]
+            coluna_atual = localizacao_cedula[1]
+
+            if self.tabuleiro[linha_atual][coluna_atual].islower():
+                if self.tabuleiro[linha_atual][coluna_atual] == 'o':
+                    if linha_atual > 0:
+                        if coluna_atual < 7:
+                            if self.tabuleiro[linha_atual - 1][coluna_atual + 1] == '-':
+                                movimentos.append([linha_atual - 1, coluna_atual + 1])
+                        if coluna_atual > 0:
+                            if self.tabuleiro[linha_atual - 1][coluna_atual - 1] == '-':
+                                movimentos.append([linha_atual - 1, coluna_atual - 1])
+
+                elif self.tabuleiro[linha_atual][coluna_atual] == 'x':
+                    if linha_atual < 7:
+                        if coluna_atual < 7:
+                            if self.tabuleiro[linha_atual + 1][coluna_atual + 1] == '-':
+                                movimentos.append([linha_atual + 1, coluna_atual + 1])
+                        if coluna_atual > 0:
+                            if self.tabuleiro[linha_atual + 1][coluna_atual - 1] == '-':
+                                movimentos.append([linha_atual + 1, coluna_atual - 1])
+            elif self.tabuleiro[linha_atual][coluna_atual].isupper():
+                conta_linha = linha_atual
+                conta_coluna = coluna_atual
+                while True:
+                    if conta_linha - 1 < 0 or conta_coluna - 1 < 0:
+                        break
+                    else:
+                        if self.tabuleiro[conta_linha - 1][conta_coluna - 1] == '-':
+                            movimentos.append([conta_linha - 1, conta_coluna - 1])
+                        else:
+                            break
+                    conta_linha -= 1
+                    conta_coluna -= 1
+
+                conta_linha = linha_atual
+                conta_coluna = coluna_atual
+                while True:
+                    if conta_linha - 1 < 0 or conta_coluna + 1 > 7:
+                        break
+                    else:
+                        if self.tabuleiro[conta_linha - 1][conta_coluna + 1] == '-':
+                            movimentos.append([conta_linha - 1, conta_coluna + 1])
+                        else:
+                            break
+                    conta_linha -= 1
+                    conta_coluna += 1
+
+                conta_linha = linha_atual
+                conta_coluna = coluna_atual
+                while True:
+                    if conta_linha + 1 > 7 or conta_coluna + 1 > 7:
+                        break
+                    else:
+                        if self.tabuleiro[conta_linha + 1][conta_coluna + 1] == '-':
+                            movimentos.append([conta_linha + 1, conta_coluna + 1])
+                        else:
+                            break
+                    conta_linha += 1
+                    conta_coluna += 1
+
+                conta_linha = linha_atual
+                conta_coluna = coluna_atual
+                while True:
+                    if conta_linha + 1 > 7 or conta_coluna - 1 < 0:
+                        break
+                    else:
+                        if self.tabuleiro[conta_linha + 1][conta_coluna - 1] == '-':
+                            movimentos.append([conta_linha + 1, conta_coluna - 1])
+                        else:
+                            break
+                    conta_linha += 1
+                    conta_coluna -= 1
+
+        return movimentos, pulos
+
+    # RETORNA TODOS OS MOVIMENTOS OBRIGATORIOS DE UM TURNO
+    def todos_obrigatorios(self):
+        todos = {}
+
+        for r in range(len(self.tabuleiro)):
+            for c in range(len(self.tabuleiro[r])):
+                ob, pulos = self.movimento_obrigatorio((r, c))
+                if ob != []:
+                    todos[(r, c)] = ob
+
+        return todos
+
+    # RETORNA OS MOVIMENTOS OBRIGATORIOS DE UMA PECA QUE PODE SER JOGADA EM DETERMINADO TURNO
+    def movimento_obrigatorio(self, localizacao_cedula):
+        obrigatorios = []
+        posicao_cedula_pulada = []
+
+        l = localizacao_cedula[0]
+        c = localizacao_cedula[1]
+
+        jogador = self.jogadores[self.turno % 2]
+        index = self.jogadores.index(jogador)
+
+        array = [jogador.lower(), jogador.upper(), '-']
+
+        if self.tabuleiro[l][c].islower() and self.tabuleiro[l][c] == jogador and \
+                                self.turno % 2 == index:
+            if l > 0:
+                if c < 7:
+                    if self.tabuleiro[l - 1][c + 1].lower() not in array:
+                        l_x = l - 1
+                        l_c = c + 1
+
+                        if l_x - 1 >= 0 and l_c + 1 <= 7:
+                            if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                obrigatorios.append([l_x - 1, l_c + 1])
+                                posicao_cedula_pulada.append((l_x, l_c))
+                if c > 0:
+                    if self.tabuleiro[l - 1][c - 1].lower() not in array:
+                        l_x = l - 1
+                        l_c = c - 1
+
+                        if l_x - 1 >= 0 and l_c - 1 >= 0:
+                            if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                obrigatorios.append([l_x - 1, l_c - 1])
+                                posicao_cedula_pulada.append((l_x, l_c))
+            if l < 7:
+                if c < 7:
+                    if self.tabuleiro[l + 1][c + 1].lower() not in array:
+                        l_x = l + 1
+                        l_c = c + 1
+
+                        if l_x + 1 <= 7 and l_c + 1 <= 7:
+                            if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                obrigatorios.append([l_x + 1, l_c + 1])
+                                posicao_cedula_pulada.append((l_x, l_c))
+                if c > 0:
+                    if self.tabuleiro[l + 1][c - 1].lower() not in array:
+                        l_x = l + 1
+                        l_c = c - 1
+
+                        if l_x + 1 <= 7 and l_c - 1 >= 0:
+                            if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                obrigatorios.append([l_x + 1, l_c - 1])
+                                posicao_cedula_pulada.append((l_x, l_c))
+
+        elif self.tabuleiro[l][c].isupper() and self.tabuleiro[l][c] == jogador.upper() and \
+                                self.turno % 2 == index:
+
+            if not self.pulando and (jogador.lower() == 'x' and l != 7) or (jogador.lower() == 'o' and l != 0):
+                conta_linha = l
+                conta_coluna = c
+                while True:
+                    if conta_linha - 1 < 0 or conta_coluna - 1 < 0:
+                        break
+                    else:
+                        if self.tabuleiro[conta_linha - 1][conta_coluna - 1] not in array:
+                            l_x = conta_linha - 1
+                            l_c = conta_coluna - 1
+
+                            if l_x - 1 >= 0 and l_c - 1 >= 0:
+                                if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                    posicao_cedula_pulada.append((l_x, l_c))
+                                    while True:
+                                        if l_x - 1 < 0 or l_c - 1 < 0:
+                                            break
+                                        else:
+                                            if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                                obrigatorios.append([l_x - 1, l_c - 1])
+                                            else:
+                                                break
+                                        l_x -= 1
+                                        l_c -= 1
+                            break
+                    conta_linha -= 1
+                    conta_coluna -= 1
+
+                conta_linha = l
+                conta_coluna = c
+                while True:
+                    if conta_linha - 1 < 0 or conta_coluna + 1 > 7:
+                        break
+                    else:
+                        if self.tabuleiro[conta_linha - 1][conta_coluna + 1] not in array:
+                            l_x = conta_linha - 1
+                            l_c = conta_coluna + 1
+
+                            if l_x - 1 >= 0 and l_c + 1 <= 7:
+                                if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                    posicao_cedula_pulada.append((l_x, l_c))
+                                    while True:
+                                        if l_x - 1 < 0 or l_c + 1 > 7:
+                                            break
+                                        else:
+                                            if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                                obrigatorios.append([l_x - 1, l_c + 1])
+                                            else:
+                                                break
+                                        l_x -= 1
+                                        l_c += 1
+                            break
+                    conta_linha -= 1
+                    conta_coluna += 1
+
+                conta_linha = l
+                conta_coluna = c
+                while True:
+                    if conta_linha + 1 > 7 or conta_coluna + 1 > 7:
+                        break
+                    else:
+                        if self.tabuleiro[conta_linha + 1][conta_coluna + 1] not in array:
+                            l_x = conta_linha + 1
+                            l_c = conta_coluna + 1
+
+                            if l_x + 1 <= 7 and l_c + 1 <= 7:
+                                if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                    posicao_cedula_pulada.append((l_x, l_c))
+                                    while True:
+                                        if l_x + 1 > 7 or l_c + 1 > 7:
+                                            break
+                                        else:
+                                            if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                                obrigatorios.append([l_x + 1, l_c + 1])
+                                            else:
+                                                break
+                                        l_x += 1
+                                        l_c += 1
+                            break
+                    conta_linha += 1
+                    conta_coluna += 1
+
+                conta_linha = l
+                conta_coluna = c
+                while True:
+                    if conta_linha + 1 > 7 or conta_coluna - 1 < 0:
+                        break
+                    else:
+                        if self.tabuleiro[conta_linha + 1][conta_coluna - 1] not in array:
+                            l_x = conta_linha + 1
+                            l_c = conta_coluna - 1
+
+                            if l_x + 1 <= 7 and l_c - 1 >= 0:
+                                if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                    posicao_cedula_pulada.append((l_x, l_c))
+                                    while True:
+                                        if l_x + 1 > 7 or l_c - 1 < 0:
+                                            break
+                                        else:
+                                            if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                                obrigatorios.append([l_x + 1, l_c - 1])
+                                            else:
+                                                break
+                                        l_x += 1
+                                        l_c -= 1
+                            break
+                    conta_linha += 1
+                    conta_coluna -= 1
+
+        return obrigatorios, posicao_cedula_pulada
+
+
+
+	# VERIFICA O VENCEDOR
+    def verifica_vencedor(self):
+
+        x = sum([contador.count('x') + contador.count('X') for contador in self.tabuleiro])
+        o = sum([contador.count('o') + contador.count('O') for contador in self.tabuleiro])
+
+        if x == 0:
+            return 'o'
+
+        if o == 0:
+            return 'x'
+
+        if x == 1 and o == 1:
+            return 'empate'
+
+        if self.cedula_selecionada:
+            if not self.movimentos_possiveis(self.cedula_selecionada)[0]:
+                if x == 1 and self.turno % 2 == 0:
+                    return 'o'
+                if o == 1 and self.turno % 2 == 1:
+                    return 'x'
+
+        if not self.existe_possivel():
+            return 'empate'
+
+        return None
+
     def desenha(self):
         matriz = []
 
@@ -126,6 +451,48 @@ class Jogo:
                     pygame.draw.rect(tela, BEGE, (x, y, TAMANHO_QUADRADO, TAMANHO_QUADRADO))
                 x += TAMANHO_QUADRADO
             y += TAMANHO_QUADRADO
+
+        if self.cedula_selecionada:
+            obrigatorios = self.todos_obrigatorios()
+            movs = self.movimentos_possiveis(self.cedula_selecionada)
+
+            if obrigatorios != {}:
+                if (self.cedula_selecionada[0], self.cedula_selecionada[1]) not in obrigatorios:
+                    x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
+                    y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
+
+                    pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
+                else:
+                    if movs[0] == []:
+                        x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
+                        y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
+
+                        pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
+                    else:
+                        for i in range(len(movs[0])):
+                            x_possivel = ALTURA / 8 * movs[0][i][1]
+                            y_possivel = ALTURA / 8 * movs[0][i][0]
+
+                            pygame.draw.rect(tela, YELLOW, (x_possivel, y_possivel, 80, 80))
+            else:
+                if self.pulando:
+                    x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
+                    y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
+
+                    pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
+                else:
+                    if movs[0] == []:
+                        x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
+                        y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
+
+                        pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
+                    else:
+                        for i in range(len(movs[0])):
+                            x_possivel = ALTURA / 8 * movs[0][i][1]
+                            y_possivel = ALTURA / 8 * movs[0][i][0]
+
+                            pygame.draw.rect(tela, YELLOW, (x_possivel, y_possivel, 80, 80))
+
 
         for l in range(len(self.tabuleiro)):
             for c in range(len(self.tabuleiro[l])):
@@ -181,6 +548,11 @@ def loop_jogo():
 
         tela.fill(PRETO)
         jogo.desenha()
+
+        vencedor = jogo.verifica_vencedor()
+
+        if vencedor is not None:
+            sair = True
 
         pygame.display.update()
         clock.tick(60)
