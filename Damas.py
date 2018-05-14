@@ -628,7 +628,6 @@ class Jogo:
                 if (self.cedula_selecionada[0], self.cedula_selecionada[1]) not in obrigatorios:
                     x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
                     y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
-
                     pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
                 else:
                     if movs[0] == []:
