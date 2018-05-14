@@ -668,16 +668,17 @@ class Jogo:
                     x = int(ALTURA / 8) * c + int(ALTURA / 16)
                     y = int(ALTURA / 8) * l + int(ALTURA / 16)
 
+                    img = pygame.image.load('coroa.png')
+                    img = pygame.transform.scale(img, (60,60))
+
                     if elemento.lower() == 'x':
                         pygame.draw.circle(tela, PRETO, (x, y), TAMANHO_DAMA, 0)
                         if elemento == 'X':
-                            pygame.draw.circle(tela, PRETO, (x, y), TAMANHO_RAINHA, 0)
-                            pygame.draw.circle(tela, AZUL, (x, y), int(TAMANHO_RAINHA/2), 0)
+                            tela.blit(img, (x - 36, y - 36))
                     else:
                         pygame.draw.circle(tela, BRANCO, (x, y), TAMANHO_DAMA, 0)
                         if elemento == 'O':
-                            pygame.draw.circle(tela, PRETO, (x, y),TAMANHO_RAINHA, 0)
-                            pygame.draw.circle(tela, AZUL, (x, y), int(TAMANHO_RAINHA/2), 0)
+                            tela.blit(img, (x - 36, y - 36))
 
 
 
@@ -697,7 +698,7 @@ def linha_clicada(pos):
             return i - 1
     return 7
 
-# DEFINIR PADRÃO DE TEXTOS NA TELA
+# DEFINIR PADRAO DE TEXTOS NA TELA
 def texto_na_tela(text, font, color):
 	txt = font.render(text, True, color)
 	return txt, txt.get_rect()
