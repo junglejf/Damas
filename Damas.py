@@ -243,7 +243,37 @@ class Jogo:
         return must_action, jumped_square
 
     def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
-        pass
+        linha_atual = localizacao_cedula[0]
+        coluna_atual = localizacao_cedula[1]
+        char = self.tabuleiro[linha_atual][coluna_atual]
+
+        self.tabuleiro[linha_destino][coluna_destino] = char
+        self.tabuleiro[linha_atual][coluna_atual] = '-'
+
+        if pulo:
+            self.pulando = True
+
+        if (jogador == 'x' and linha_destino == 7) or (jogador == 'o' and linha_destino == 0):
+            if not self.pulando:
+                self.tabuleiro[linha_destino][coluna_destino] = char.upper()
+            elif not self.movimentos_possiveis((linha_destino, coluna_destino))[0]:
+                self.tabuleiro[linha_destino][coluna_destino] = char.upper()
+
+        if pulo:
+            self.tabuleiro[pulo[0]][pulo[1]] = '-'
+            self.cedula_selecionada = [linha_destino, coluna_destino]
+            self.pulando = True
+
+        else:
+            self.cedula_selecionada = None
+            self.proximo_turno()
+        vencedor = self.verifica_vencedor()
+
+        if vencedor != None:
+            self.estado = ('game over')
+
+    def proximo_turno(self):
+        self.turno += 1
 
     def desenha(self):
         matriz = []
