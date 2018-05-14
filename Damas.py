@@ -102,6 +102,174 @@ class Jogo:
 
         return False, None
 
+    def movimento_obrigatorio(self, tabuleiro):
+        must_action = []
+        jumped_square = []
+
+        l = tabuleiro[0]
+        c = tabuleiro[1]
+
+        jogador = self.jogadores[self.turno % 2]
+        index = self.jogadores.index(jogador)
+
+        array = [jogador.lower(), jogador.upper(), '-']
+
+        if self.tabuleiro[l][c].islower() and self.tabuleiro[l][c] == jogador and \
+                                self.turno % 2 == index:
+            if l > 0:
+                if c < 7:
+                    if self.tabuleiro[l - 1][c + 1].lower() not in array:
+                        l_x = l - 1
+                        l_c = c + 1
+
+                        if l_x - 1 >= 0 and l_c + 1 <= 7:
+                            if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                must_action.append([l_x - 1, l_c + 1])
+                                jumped_square.append((l_x, l_c))
+                if c > 0:
+                    if self.tabuleiro[l - 1][c - 1].lower() not in array:
+                        l_x = l - 1
+                        l_c = c - 1
+
+                        if l_x - 1 >= 0 and l_c - 1 >= 0:
+                            if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                must_action.append([l_x - 1, l_c - 1])
+                                jumped_square.append((l_x, l_c))
+            if l < 7:
+                if c < 7:
+                    if self.tabuleiro[l + 1][c + 1].lower() not in array:
+                        l_x = l + 1
+                        l_c = c + 1
+
+                        if l_x + 1 <= 7 and l_c + 1 <= 7:
+                            if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                must_action.append([l_x + 1, l_c + 1])
+                                jumped_square.append((l_x, l_c))
+                if c > 0:
+                    if self.tabuleiro[l + 1][c - 1].lower() not in array:
+                        l_x = l + 1
+                        l_c = c - 1
+
+                        if l_x + 1 <= 7 and l_c - 1 >= 0:
+                            if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                must_action.append([l_x + 1, l_c - 1])
+                                jumped_square.append((l_x, l_c))
+
+		# movimento Rainha
+        elif self.tabuleiro[l][c].isupper() and self.tabuleiro[l][c] == jogador.upper() and \
+                                self.turno % 2 == index:
+
+            if not self.pulando and (jogador.lower() == 'x' and l != 7) or (jogador.lower() == 'o' and l != 0):
+                movimento_x = l
+                movimento_y = c
+                while True:
+                    if movimento_x - 1 < 0 or movimento_y - 1 < 0:
+                        break
+                    else:
+                        if self.tabuleiro[movimento_x - 1][movimento_y - 1] not in array:
+                            l_x = movimento_x - 1
+                            l_c = movimento_y - 1
+
+                            if l_x - 1 >= 0 and l_c - 1 >= 0:
+                                if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                    jumped_square.append((l_x, l_c))
+                                    while True:
+                                        if l_x - 1 < 0 or l_c - 1 < 0:
+                                            break
+                                        else:
+                                            if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                                must_action.append([l_x - 1, l_c - 1])
+                                            else:
+                                                break
+                                        l_x -= 1
+                                        l_c -= 1
+                            break
+                    movimento_x -= 1
+                    movimento_y -= 1
+
+                movimento_x = l
+                movimento_y = c
+                while True:
+                    if movimento_x - 1 < 0 or movimento_y + 1 > 7:
+                        break
+                    else:
+                        if self.tabuleiro[movimento_x - 1][movimento_y + 1] not in array:
+                            l_x = movimento_x - 1
+                            l_c = movimento_y + 1
+
+                            if l_x - 1 >= 0 and l_c + 1 <= 7:
+                                if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                    jumped_square.append((l_x, l_c))
+                                    while True:
+                                        if l_x - 1 < 0 or l_c + 1 > 7:
+                                            break
+                                        else:
+                                            if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                                must_action.append([l_x - 1, l_c + 1])
+                                            else:
+                                                break
+                                        l_x -= 1
+                                        l_c += 1
+                            break
+                    movimento_x -= 1
+                    movimento_y += 1
+
+                movimento_x = l
+                movimento_y = c
+                while True:
+                    if movimento_x + 1 > 7 or movimento_y + 1 > 7:
+                        break
+                    else:
+                        if self.tabuleiro[movimento_x + 1][movimento_y + 1] not in array:
+                            l_x = movimento_x + 1
+                            l_c = movimento_y + 1
+
+                            if l_x + 1 <= 7 and l_c + 1 <= 7:
+                                if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                    jumped_square.append((l_x, l_c))
+                                    while True:
+                                        if l_x + 1 > 7 or l_c + 1 > 7:
+                                            break
+                                        else:
+                                            if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                                must_action.append([l_x + 1, l_c + 1])
+                                            else:
+                                                break
+                                        l_x += 1
+                                        l_c += 1
+                            break
+                    movimento_x += 1
+                    movimento_y += 1
+
+                movimento_x = l
+                movimento_y = c
+                while True:
+                    if movimento_x + 1 > 7 or movimento_y - 1 < 0:
+                        break
+                    else:
+                        if self.tabuleiro[movimento_x + 1][movimento_y - 1] not in array:
+                            l_x = movimento_x + 1
+                            l_c = movimento_y - 1
+
+                            if l_x + 1 <= 7 and l_c - 1 >= 0:
+                                if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                    jumped_square.append((l_x, l_c))
+                                    while True:
+                                        if l_x + 1 > 7 or l_c - 1 < 0:
+                                            break
+                                        else:
+                                            if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                                must_action.append([l_x + 1, l_c - 1])
+                                            else:
+                                                break
+                                        l_x += 1
+                                        l_c -= 1
+                            break
+                    movimento_x += 1
+                    movimento_y -= 1
+
+        return must_action, jumped_square
+
     def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
         linha_atual = localizacao_cedula[0]
         coluna_atual = localizacao_cedula[1]
