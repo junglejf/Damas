@@ -68,7 +68,9 @@ class Jogo:
                     self.cedula_selecionada = None
 
             else:
-                if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
+                if self.jogadores[self.turno % 2].lower() == 'x':
+                    self.jogaIA()
+                elif self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
                     self.cedula_selecionada = [linha, coluna]
 
     def is_movimento_valido(self, jogador, localizacao_cedula, linha_destino, coluna_destino):
@@ -102,8 +104,8 @@ class Jogo:
 
         return False, None
     def jogaIA(self):
-        time.sleep(2)
-
+        #time.sleep(2)
+        pulo = []
         obrigatorios = self.todos_obrigatorios()
         print (obrigatorios)
         if obrigatorios != {}:
@@ -117,6 +119,44 @@ class Jogo:
                         coluna_dest = resp[0][1]
                         print ('posicao origem: (', linha_origem, ',', coluna_origem, ')')
                         print ('posicao destino: (', linha_dest, ',', coluna_dest, ')')
+                        break
+
+            char = self.tabuleiro[linha_origem][coluna_origem]
+
+            self.tabuleiro[linha_dest][coluna_dest] = char
+            self.tabuleiro[linha_origem][coluna_origem] = '-'
+
+            if linha_dest > linha_origem:
+                pulo.append(linha_origem + 1)
+            else:
+                pulo.append(linha_origem - 1)
+            if coluna_dest > coluna_origem:
+                pulo.append(coluna_origem + 1)
+            else:
+                pulo.append(coluna_origem - 1)
+
+            if pulo:
+                self.pulando = True
+
+            if (linha_dest == 7):
+                if not self.movimentos_possiveis((linha_dest, coluna_dest))[0]:
+                    self.tabuleiro[linha_dest][coluna_dest] = char.upper()
+
+            if pulo != []:
+                self.tabuleiro[pulo[0]][pulo[1]] = '-'
+                self.cedula_selecionada = [linha_dest, coluna_dest]
+                self.pulando = True
+
+            else:
+                self.cedula_selecionada = None
+                self.proximo_turno()
+            vencedor = self.verifica_vencedor()
+
+            if vencedor != None:
+                self.estado = ('game over')
+
+    def proximo_turno(self):
+        self.turno += 1
 
     def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
         linha_atual = localizacao_cedula[0]
