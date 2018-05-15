@@ -1,5 +1,5 @@
 import pygame
-
+import time
 pygame.init()
 
 LARGURA = 640
@@ -101,6 +101,22 @@ class Jogo:
             return True, None
 
         return False, None
+    def jogaIA(self):
+        time.sleep(2)
+
+        obrigatorios = self.todos_obrigatorios()
+        print (obrigatorios)
+        if obrigatorios != {}:
+            for i in range(len(self.tabuleiro)):
+                for j in range(len(self.tabuleiro[1])):
+                    if(i,j) in obrigatorios:
+                        linha_origem = i
+                        coluna_origem = j
+                        resp = obrigatorios[(i,j)]
+                        linha_dest = resp[0][0]
+                        coluna_dest = resp[0][1]
+                        print ('posicao origem: (', linha_origem, ',', coluna_origem, ')')
+                        print ('posicao destino: (', linha_dest, ',', coluna_dest, ')')
 
     def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
         linha_atual = localizacao_cedula[0]
@@ -402,6 +418,8 @@ def loop_jogo():
                 quit()
             if evento.type == pygame.MOUSEBUTTONDOWN:
                 jogo.jogadas(pygame.mouse.get_pos())
+                jogo.jogaIA()
+                jogo.proximo_turno()
 
         tela.fill(PRETO)
         jogo.desenha()
