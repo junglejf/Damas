@@ -70,8 +70,6 @@ class Jogo:
             else:
                 if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
                     self.cedula_selecionada = [linha, coluna]
-        else:
-            self.fim_de_jogo()
 
     def is_movimento_valido(self, jogador, localizacao_cedula, linha_destino, coluna_destino):
 
@@ -265,43 +263,6 @@ class Jogo:
 
             return None
 
-    def fim_de_jogo(self):
-        winner = self.verifica_vencedor()
-        fim = False
-        while not fim:
-            for evento in pygame.event.get():
-                if evento.type == pygame.QUIT:
-                    fim = True
-                    pygame.quit()
-                    quit()
-                if evento.type == pygame.KEYDOWN or evento.type == pygame.MOUSEBUTTONDOWN:
-                    fim = True
-
-            tela.fill(AZUL)
-
-            fonte = pygame.font.SysFont('comicsansms', 50)
-
-            surface_texto, rect_texto = None, None
-
-            if winner == "empate":
-                surface_texto, rect_texto = texto_na_tela("EMPATE!", fonte, BRANCO)
-            elif winner == "x":
-                surface_texto, rect_texto = texto_na_tela("PRETO WINS", fonte, PRETO)
-            elif winner == "o":
-                surface_texto, rect_texto = texto_na_tela("BRANCO WINS", fonte, BRANCO)
-
-            rect_texto.center = ((LARGURA / 2), ALTURA / 3)
-            tela.blit(surface_texto, rect_texto)
-
-            fonte = pygame.font.Font(None, 30)
-            voltar = fonte.render('Pressione qualquer tecla para jogar novamente.', False, CORAL)
-
-            tela.blit(voltar, (25, 550))
-
-            pygame.display.update()
-            clock.tick(60)
-        self.estado = 'jogando'
-
 
     def desenha(self):
         matriz = []
@@ -375,6 +336,39 @@ class Jogo:
                     else:
                         pygame.draw.circle(tela, BRANCO, (x, y), TAMANHO_DAMA, 0)
 
+def fim_de_jogo(winner):
+    fim = False
+    while not fim:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                fim = True
+                pygame.quit()
+                quit()
+            if evento.type == pygame.KEYDOWN or evento.type == pygame.MOUSEBUTTONDOWN:
+                fim = True
+
+        tela.fill(AZUL)
+        fonte = pygame.font.SysFont('comicsansms', 50)
+
+        surface_texto, rect_texto = None, None
+
+        if winner == "empate":
+            surface_texto, rect_texto = texto_na_tela("EMPATE!", fonte, BRANCO)
+        elif winner == "x":
+            surface_texto, rect_texto = texto_na_tela("PRETO WINS", fonte, PRETO)
+        elif winner == "o":
+            surface_texto, rect_texto = texto_na_tela("BRANCO WINS", fonte, BRANCO)
+        rect_texto.center = ((LARGURA / 2), ALTURA / 3)
+        tela.blit(surface_texto, rect_texto)
+
+        fonte = pygame.font.Font(None, 30)
+        voltar = fonte.render('Pressione qualquer tecla para jogar novamente.', False, CORAL)
+
+        tela.blit(voltar, (25, 550))
+
+        pygame.display.update()
+        clock.tick(60)
+
 
 def coluna_clicada(pos):
     x = pos[0]
@@ -411,6 +405,13 @@ def loop_jogo():
 
         tela.fill(PRETO)
         jogo.desenha()
+
+        vencedor = jogo.verifica_vencedor()
+
+        if vencedor is not None:
+            fim_de_jogo(vencedor)
+            sair = True
+
 
         pygame.display.update()
         clock.tick(60)
