@@ -172,6 +172,43 @@ class Jogo:
 
         return obrigatorios, posicao_cedula_pulada
 
+    def existe_possivel(self):
+        for l in range(len(self.tabuleiro)):
+            for c in range(len(self.tabuleiro[l])):
+                if self.movimentos_possiveis((l, c))[0]:
+                    return True
+        return False
+
+    # MOSTRA OS MOVIMENTOS POSSIVEIS DE UMA PECA SELECIONADA
+    def movimentos_possiveis(self, localizacao_cedula):
+        movimentos, pulos = self.movimento_obrigatorio(localizacao_cedula)
+
+        if movimentos == []:
+            linha_atual = localizacao_cedula[0]
+            coluna_atual = localizacao_cedula[1]
+
+            if self.tabuleiro[linha_atual][coluna_atual].islower():
+                if self.tabuleiro[linha_atual][coluna_atual] == 'o':
+                    if linha_atual > 0:
+                        if coluna_atual < 7:
+                            if self.tabuleiro[linha_atual - 1][coluna_atual + 1] == '-':
+                                movimentos.append([linha_atual - 1, coluna_atual + 1])
+                        if coluna_atual > 0:
+                            if self.tabuleiro[linha_atual - 1][coluna_atual - 1] == '-':
+                                movimentos.append([linha_atual - 1, coluna_atual - 1])
+
+                elif self.tabuleiro[linha_atual][coluna_atual] == 'x':
+                    if linha_atual < 7:
+                        if coluna_atual < 7:
+                            if self.tabuleiro[linha_atual + 1][coluna_atual + 1] == '-':
+                                movimentos.append([linha_atual + 1, coluna_atual + 1])
+                        if coluna_atual > 0:
+                            if self.tabuleiro[linha_atual + 1][coluna_atual - 1] == '-':
+                                movimentos.append([linha_atual + 1, coluna_atual - 1])
+
+        return movimentos, pulos
+
+
     def desenha(self):
         matriz = []
 
