@@ -86,9 +86,7 @@ class Jogo:
             self.pulando = True
 
         if (jogador == 'x' and linha_destino == 7) or (jogador == 'o' and linha_destino == 0):
-            if not self.pulando:
-                self.tabuleiro[linha_destino][coluna_destino] = char.upper()
-            elif not self.movimentos_possiveis((linha_destino, coluna_destino))[0]:
+            if not self.movimentos_possiveis((linha_destino, coluna_destino))[0]:
                 self.tabuleiro[linha_destino][coluna_destino] = char.upper()
 
         if pulo:
@@ -99,10 +97,10 @@ class Jogo:
         else:
             self.cedula_selecionada = None
             self.proximo_turno()
-        vencedor = self.verifica_vencedor()
+        #vencedor = self.verifica_vencedor()
 
-        if vencedor != None:
-            self.estado = ('game over')
+        #if vencedor != None:
+            #self.estado = ('game over')
 
     def proximo_turno(self):
         self.turno += 1
@@ -134,18 +132,17 @@ class Jogo:
                     x = int(ALTURA / 8) * c + int(ALTURA / 16)
                     y = int(ALTURA / 8) * l + int(ALTURA / 16)
 
+                    img = pygame.image.load('coroa.png')
+                    img = pygame.transform.scale(img, (60, 60))
+
                     if elemento.lower() == 'x':
                         pygame.draw.circle(tela, PRETO, (x, y), TAMANHO_DAMA, 0)
                         if elemento == 'X':
-                            pygame.draw.circle(tela, PRETO, (x, y), TAMANHO_RAINHA, 0)
-                            pygame.draw.circle(tela, AZUL, (x, y), int(TAMANHO_RAINHA/2), 0)
+                            tela.blit(img, (x - 36, y - 36))
                     else:
                         pygame.draw.circle(tela, BRANCO, (x, y), TAMANHO_DAMA, 0)
                         if elemento == 'O':
-                            pygame.draw.circle(tela, PRETO, (x, y),TAMANHO_RAINHA, 0)
-                            pygame.draw.circle(tela, AZUL, (x, y), int(TAMANHO_RAINHA/2), 0)
-
-
+                            tela.blit(img, (x - 36, y - 36))
 
 
 def coluna_clicada(pos):
