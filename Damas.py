@@ -97,13 +97,80 @@ class Jogo:
         else:
             self.cedula_selecionada = None
             self.proximo_turno()
-        #vencedor = self.verifica_vencedor()
+       # vencedor = self.verifica_vencedor()
 
         #if vencedor != None:
-            #self.estado = ('game over')
+         #   self.estado = ('game over')
 
     def proximo_turno(self):
         self.turno += 1
+
+        # RETORNA TODOS OS MOVIMENTOS OBRIGATORIOS DE UM TURNO
+    def todos_obrigatorios(self):
+        all = {}
+
+        for r in range(len(self.tabuleiro)):
+            for c in range(len(self.tabuleiro[r])):
+                ob, pulos = self.movimento_obrigatorio((r, c))
+                if ob != []:
+                    all[(r, c)] = ob
+
+        return all
+        # RETORNA OS MOVIMENTOS OBRIGATORIOS DE UMA PECA QUE PODE SER JOGADA EM DETERMINADO TURNO
+    def movimento_obrigatorio(self, localizacao_cedula):
+        obrigatorios = []
+        posicao_cedula_pulada = []
+
+        l = localizacao_cedula[0]
+        c = localizacao_cedula[1]
+
+        jogador = self.jogadores[self.turno % 2]
+        index = self.jogadores.index(jogador)
+
+        array = [jogador.lower(), jogador.upper(), '-']
+
+        if self.tabuleiro[l][c].islower() and self.tabuleiro[l][c] == jogador and \
+                                self.turno % 2 == index:
+            if l > 0:
+                if c < 7:
+                    if self.tabuleiro[l - 1][c + 1].lower() not in array:
+                        l_x = l - 1
+                        l_c = c + 1
+
+                        if l_x - 1 >= 0 and l_c + 1 <= 7:
+                            if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                obrigatorios.append([l_x - 1, l_c + 1])
+                                posicao_cedula_pulada.append((l_x, l_c))
+                if c > 0:
+                    if self.tabuleiro[l - 1][c - 1].lower() not in array:
+                        l_x = l - 1
+                        l_c = c - 1
+
+                        if l_x - 1 >= 0 and l_c - 1 >= 0:
+                            if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                obrigatorios.append([l_x - 1, l_c - 1])
+                                posicao_cedula_pulada.append((l_x, l_c))
+            if l < 7:
+                if c < 7:
+                    if self.tabuleiro[l + 1][c + 1].lower() not in array:
+                        l_x = l + 1
+                        l_c = c + 1
+
+                        if l_x + 1 <= 7 and l_c + 1 <= 7:
+                            if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                obrigatorios.append([l_x + 1, l_c + 1])
+                                posicao_cedula_pulada.append((l_x, l_c))
+                if c > 0:
+                    if self.tabuleiro[l + 1][c - 1].lower() not in array:
+                        l_x = l + 1
+                        l_c = c - 1
+
+                        if l_x + 1 <= 7 and l_c - 1 >= 0:
+                            if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                obrigatorios.append([l_x + 1, l_c - 1])
+                                posicao_cedula_pulada.append((l_x, l_c))
+
+        return obrigatorios, posicao_cedula_pulada
 
     def desenha(self):
         matriz = []
