@@ -59,17 +59,47 @@ class Jogo:
                                                      coluna)
                 if movimento[0]:
                     self.jogar(self.jogadores[self.turno % 2], self.cedula_selecionada, linha, coluna, movimento[1])
+                elif linha == self.cedula_selecionada[0] and coluna == self.cedula_selecionada[1]:
+                    movs = self.movimento_obrigatorio(self.cedula_selecionada)
+                    if movs[0] == []:
+                        if self.pulando:
+                            self.pulando = False
+                            self.proximo_turno()
+                    self.cedula_selecionada = None
 
             else:
                 if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
                     self.cedula_selecionada = [linha, coluna]
+        else:
+            self.fim_de_jogo()
 
-    def is_movimento_valido(self,jogador, localizacao_cedula, linha_destino, coluna_destino):
+    def is_movimento_valido(self, jogador, localizacao_cedula, linha_destino, coluna_destino):
 
-        matriz = self.getTabuleiro()
         linha_originaria = localizacao_cedula[0]
         coluna_originaria = localizacao_cedula[1]
-        if(matriz[linha_destino][coluna_destino] == '-'):
+
+        obrigatorios = self.todos_obrigatorios()
+
+        if obrigatorios != {}:
+            if (linha_originaria, coluna_originaria) not in obrigatorios:
+                return False, None
+            elif [linha_destino, coluna_destino] not in obrigatorios[(linha_originaria, coluna_originaria)]:
+                return False, None
+
+        movimento, pulo = self.movimentos_possiveis(localizacao_cedula)
+
+        if [linha_destino, coluna_destino] in movimento:
+            if pulo:
+                if len(pulo) == 1:
+                    return True, pulo[0]
+                else:
+                    for i in range(len(pulo)):
+                        if abs(pulo[i][0] - linha_destino) == 1 and abs(pulo[i][1] - coluna_destino) == 1:
+                            return True, pulo[i]
+
+            if self.pulando:
+                return False, None
+
             return True, None
 
         return False, None
@@ -97,10 +127,10 @@ class Jogo:
         else:
             self.cedula_selecionada = None
             self.proximo_turno()
-       # vencedor = self.verifica_vencedor()
+        vencedor = self.verifica_vencedor()
 
-        #if vencedor != None:
-         #   self.estado = ('game over')
+        if vencedor != None:
+            self.estado = ('game over')
 
     def proximo_turno(self):
         self.turno += 1
@@ -208,6 +238,70 @@ class Jogo:
 
         return movimentos, pulos
 
+        # VERIFICA O VENCEDOR
+    def verifica_vencedor(self):
+
+            x = sum([contador.count('x') + contador.count('X') for contador in self.tabuleiro])
+            o = sum([contador.count('o') + contador.count('O') for contador in self.tabuleiro])
+
+            if x == 0:
+                return 'o'
+
+            if o == 0:
+                return 'x'
+
+            if x == 1 and o == 1:
+                return 'empate'
+
+            if self.cedula_selecionada:
+                if not self.movimentos_possiveis(self.cedula_selecionada)[0]:
+                    if x == 1 and self.turno % 2 == 0:
+                        return 'o'
+                    if o == 1 and self.turno % 2 == 1:
+                        return 'x'
+
+            if not self.existe_possivel():
+                return 'empate'
+
+            return None
+
+    def fim_de_jogo(self):
+        winner = self.verifica_vencedor()
+        fim = False
+        while not fim:
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    fim = True
+                    pygame.quit()
+                    quit()
+                if evento.type == pygame.KEYDOWN or evento.type == pygame.MOUSEBUTTONDOWN:
+                    fim = True
+
+            tela.fill(AZUL)
+
+            fonte = pygame.font.SysFont('comicsansms', 50)
+
+            surface_texto, rect_texto = None, None
+
+            if winner == "empate":
+                surface_texto, rect_texto = texto_na_tela("EMPATE!", fonte, BRANCO)
+            elif winner == "x":
+                surface_texto, rect_texto = texto_na_tela("PRETO WINS", fonte, PRETO)
+            elif winner == "o":
+                surface_texto, rect_texto = texto_na_tela("BRANCO WINS", fonte, BRANCO)
+
+            rect_texto.center = ((LARGURA / 2), ALTURA / 3)
+            tela.blit(surface_texto, rect_texto)
+
+            fonte = pygame.font.Font(None, 30)
+            voltar = fonte.render('Pressione qualquer tecla para jogar novamente.', False, CORAL)
+
+            tela.blit(voltar, (25, 550))
+
+            pygame.display.update()
+            clock.tick(60)
+        self.estado = 'jogando'
+
 
     def desenha(self):
         matriz = []
@@ -229,6 +323,46 @@ class Jogo:
                 x += TAMANHO_QUADRADO
             y += TAMANHO_QUADRADO
 
+        if self.cedula_selecionada:
+            obrigatorios = self.todos_obrigatorios()
+            movs = self.movimentos_possiveis(self.cedula_selecionada)
+
+            if obrigatorios != {}:
+                if (self.cedula_selecionada[0], self.cedula_selecionada[1]) not in obrigatorios:
+                    x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
+                    y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
+                    pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
+                else:
+                    if movs[0] == []:
+                        x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
+                        y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
+
+                        pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
+                    else:
+                        for i in range(len(movs[0])):
+                            x_possivel = ALTURA / 8 * movs[0][i][1]
+                            y_possivel = ALTURA / 8 * movs[0][i][0]
+
+                            pygame.draw.rect(tela, YELLOW, (x_possivel, y_possivel, 80, 80))
+            else:
+                if self.pulando:
+                    x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
+                    y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
+
+                    pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
+                else:
+                    if movs[0] == []:
+                        x_vermelho = ALTURA / 8 * self.cedula_selecionada[1]
+                        y_vermelho = ALTURA / 8 * self.cedula_selecionada[0]
+
+                        pygame.draw.rect(tela, VERMELHO_CLARO, (x_vermelho, y_vermelho, 80, 80))
+                    else:
+                        for i in range(len(movs[0])):
+                            x_possivel = ALTURA / 8 * movs[0][i][1]
+                            y_possivel = ALTURA / 8 * movs[0][i][0]
+
+                            pygame.draw.rect(tela, YELLOW, (x_possivel, y_possivel, 80, 80))
+
         for l in range(len(self.tabuleiro)):
             for c in range(len(self.tabuleiro[l])):
                 elemento = self.tabuleiro[l][c]
@@ -236,17 +370,10 @@ class Jogo:
                     x = int(ALTURA / 8) * c + int(ALTURA / 16)
                     y = int(ALTURA / 8) * l + int(ALTURA / 16)
 
-                    img = pygame.image.load('coroa.png')
-                    img = pygame.transform.scale(img, (60, 60))
-
                     if elemento.lower() == 'x':
                         pygame.draw.circle(tela, PRETO, (x, y), TAMANHO_DAMA, 0)
-                        if elemento == 'X':
-                            tela.blit(img, (x - 36, y - 36))
                     else:
                         pygame.draw.circle(tela, BRANCO, (x, y), TAMANHO_DAMA, 0)
-                        if elemento == 'O':
-                            tela.blit(img, (x - 36, y - 36))
 
 
 def coluna_clicada(pos):
@@ -256,6 +383,9 @@ def coluna_clicada(pos):
             return i - 1
     return 7
 
+def texto_na_tela(text, font, color):
+	txt = font.render(text, True, color)
+	return txt, txt.get_rect()
 
 def linha_clicada(pos):
     y = pos[1]
@@ -263,7 +393,6 @@ def linha_clicada(pos):
         if y < i * ALTURA / 8:
             return i - 1
     return 7
-
 
 
 def loop_jogo():
