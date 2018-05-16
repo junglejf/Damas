@@ -7,6 +7,7 @@ ALTURA = 640
 
 BEGE = (238,238,210)
 PRETO = (0, 0, 0)
+FOSCO = (158, 158, 158)
 BRANCO = (255, 255, 255)
 CINZA = (100, 100, 100)
 VERDE_ESCURO = (118,150,86)
@@ -119,8 +120,33 @@ class Jogo:
                         print ('posicao destino: (', linha_dest, ',', coluna_dest, ')')
                         break
 
-            char = self.tabuleiro[linha_origem][coluna_origem]
+            y_origem = ALTURA / 8 * linha_origem
+            x_origem = ALTURA / 8 * coluna_origem
 
+            y_d = ALTURA / 8 * linha_dest
+            x_d = ALTURA / 8 * coluna_dest
+
+            y_dest = int(ALTURA / 8) * linha_dest + int(ALTURA / 16)
+            x_dest = int(ALTURA / 8) * coluna_dest + int(ALTURA / 16)
+
+            y = int(ALTURA / 8) * linha_origem + int(ALTURA / 16)
+            x = int(ALTURA / 8) * coluna_origem + int(ALTURA / 16)
+
+            pygame.draw.rect(tela, YELLOW, (x_origem, y_origem, 80, 80))
+            pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
+            pygame.display.update()
+            time.sleep(1)
+            pygame.draw.circle(tela, FOSCO, (int(x_dest), int(y_dest)), TAMANHO_DAMA, 0)
+            pygame.display.update()
+            time.sleep(1)
+            pygame.draw.rect(tela, VERDE_ESCURO, (x_d, y_d, 80, 80))
+            pygame.draw.rect(tela, VERDE_ESCURO, (x_origem, y_origem, 80, 80))
+            pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
+            pygame.display.update()
+            time.sleep(1)
+            #pygame.draw.rect(tela, VERDE_CLARO, (linha_dest, coluna_dest, 80, 80))
+
+            char = self.tabuleiro[linha_origem][coluna_origem]
             self.tabuleiro[linha_dest][coluna_dest] = char
             self.tabuleiro[linha_origem][coluna_origem] = '-'
 
@@ -133,15 +159,15 @@ class Jogo:
             else:
                 pulo.append(coluna_origem - 1)
 
-            self.pulando = True
+            #self.pulando = True
 
             if (linha_dest == 7):
                 if not self.movimentos_possiveis((linha_dest, coluna_dest))[0]:
                     self.tabuleiro[linha_dest][coluna_dest] = char.upper()
 
             self.tabuleiro[pulo[0]][pulo[1]] = '-'
-            self.cedula_selecionada = [linha_dest, coluna_dest]
-            self.pulando = True
+            #self.cedula_selecionada = [linha_dest, coluna_dest]
+            #self.pulando = True
 
             vencedor = self.verifica_vencedor()
 
@@ -447,7 +473,7 @@ def loop_jogo():
     jogo = Jogo()
 
     while not sair:
-        print (jogo.jogadores[jogo.turno % 2])
+        #print (jogo.jogadores[jogo.turno % 2])
         if jogo.jogadores[jogo.turno % 2] == 'o':
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
@@ -457,6 +483,7 @@ def loop_jogo():
                 if evento.type == pygame.MOUSEBUTTONDOWN:
                     jogo.jogadas(pygame.mouse.get_pos())
         else:
+            time.sleep(1)
             jogo.jogaIA()
                 #jogo.proximo_turno()
 
