@@ -68,9 +68,7 @@ class Jogo:
                     self.cedula_selecionada = None
 
             else:
-                if self.jogadores[self.turno % 2].lower() == 'x':
-                    self.jogaIA()
-                elif self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
+                if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
                     self.cedula_selecionada = [linha, coluna]
 
     def is_movimento_valido(self, jogador, localizacao_cedula, linha_destino, coluna_destino):
@@ -135,25 +133,23 @@ class Jogo:
             else:
                 pulo.append(coluna_origem - 1)
 
-            if pulo:
-                self.pulando = True
+            self.pulando = True
 
             if (linha_dest == 7):
                 if not self.movimentos_possiveis((linha_dest, coluna_dest))[0]:
                     self.tabuleiro[linha_dest][coluna_dest] = char.upper()
 
-            if pulo != []:
-                self.tabuleiro[pulo[0]][pulo[1]] = '-'
-                self.cedula_selecionada = [linha_dest, coluna_dest]
-                self.pulando = True
+            self.tabuleiro[pulo[0]][pulo[1]] = '-'
+            self.cedula_selecionada = [linha_dest, coluna_dest]
+            self.pulando = True
 
-            else:
-                self.cedula_selecionada = None
-                self.proximo_turno()
             vencedor = self.verifica_vencedor()
 
             if vencedor != None:
                 self.estado = ('game over')
+        else:
+            self.cedula_selecionada = None
+            self.proximo_turno()
 
     def proximo_turno(self):
         self.turno += 1
@@ -451,15 +447,18 @@ def loop_jogo():
     jogo = Jogo()
 
     while not sair:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                sair = True
-                pygame.quit()
-                quit()
-            if evento.type == pygame.MOUSEBUTTONDOWN:
-                jogo.jogadas(pygame.mouse.get_pos())
-                jogo.jogaIA()
-                jogo.proximo_turno()
+        print (jogo.jogadores[jogo.turno % 2])
+        if jogo.jogadores[jogo.turno % 2] == 'o':
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    sair = True
+                    pygame.quit()
+                    quit()
+                if evento.type == pygame.MOUSEBUTTONDOWN:
+                    jogo.jogadas(pygame.mouse.get_pos())
+        else:
+            jogo.jogaIA()
+                #jogo.proximo_turno()
 
         tela.fill(PRETO)
         jogo.desenha()
