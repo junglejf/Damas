@@ -1,5 +1,5 @@
 import pygame
-
+import time
 pygame.init()
 
 LARGURA = 640
@@ -7,6 +7,7 @@ ALTURA = 640
 
 BEGE = (238,238,210)
 PRETO = (0, 0, 0)
+FOSCO = (158, 158, 158)
 BRANCO = (255, 255, 255)
 CINZA = (100, 100, 100)
 VERDE_ESCURO = (118,150,86)
@@ -101,6 +102,9 @@ class Jogo:
             return True, None
 
         return False, None
+
+    def proximo_turno(self):
+        self.turno += 1
 
     def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
         linha_atual = localizacao_cedula[0]
@@ -388,6 +392,130 @@ def linha_clicada(pos):
             return i - 1
     return 7
 
+def getRandomPosIA(tabuleiro):
+    for i in range(len(tabuleiro)):
+        for j in range(len(tabuleiro[i])):
+            if tabuleiro[i][j].lower() == 'x':
+                if i<7:
+                    if j<7:
+                        if tabuleiro[i+1][j+1] == '-':
+                            linha, coluna = i, j
+                            break
+                    elif j>0:
+                        if tabuleiro[i+1][j-1] == '-':
+                            linha, coluna = i, j
+                            break
+    return linha, coluna
+
+def IAsimples(jogo):
+    pulo = []
+    obrigatorios = jogo.todos_obrigatorios()
+    if obrigatorios != {}:
+        for i in range(len(jogo.tabuleiro)):
+            for j in range(len(jogo.tabuleiro[1])):
+                if(i,j) in obrigatorios:
+                    linha_origem = i
+                    coluna_origem = j
+                    resp = obrigatorios[(i,j)]
+                    linha_dest = resp[0][0]
+                    coluna_dest = resp[0][1]
+                    print ('posicao origem: (', linha_origem, ',', coluna_origem, ')')
+                    print ('posicao destino: (', linha_dest, ',', coluna_dest, ')')
+                    break
+
+        y_origem = ALTURA / 8 * linha_origem
+        x_origem = ALTURA / 8 * coluna_origem
+
+        y_d = ALTURA / 8 * linha_dest
+        x_d = ALTURA / 8 * coluna_dest
+
+        y_dest = int(ALTURA / 8) * linha_dest + int(ALTURA / 16)
+        x_dest = int(ALTURA / 8) * coluna_dest + int(ALTURA / 16)
+
+        y = int(ALTURA / 8) * linha_origem + int(ALTURA / 16)
+        x = int(ALTURA / 8) * coluna_origem + int(ALTURA / 16)
+
+        pygame.draw.rect(tela, YELLOW, (x_origem, y_origem, 80, 80))
+        pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
+        pygame.display.update()
+        time.sleep(1)
+        pygame.draw.circle(tela, FOSCO, (int(x_dest), int(y_dest)), TAMANHO_DAMA, 0)
+        pygame.display.update()
+        time.sleep(1)
+        pygame.draw.rect(tela, VERDE_ESCURO, (x_d, y_d, 80, 80))
+        pygame.draw.rect(tela, VERDE_ESCURO, (x_origem, y_origem, 80, 80))
+        pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
+        pygame.display.update()
+        time.sleep(1)
+
+
+        char = jogo.tabuleiro[linha_origem][coluna_origem]
+        jogo.tabuleiro[linha_dest][coluna_dest] = char
+        jogo.tabuleiro[linha_origem][coluna_origem] = '-'
+
+        if linha_dest > linha_origem:
+            pulo.append(linha_origem + 1)
+        else:
+            pulo.append(linha_origem - 1)
+        if coluna_dest > coluna_origem:
+            pulo.append(coluna_origem + 1)
+        else:
+            pulo.append(coluna_origem - 1)
+
+        if (linha_dest == 7):
+            if not jogo.movimentos_possiveis((linha_dest, coluna_dest))[0]:
+                jogo.tabuleiro[linha_dest][coluna_dest] = char.upper()
+
+        jogo.tabuleiro[pulo[0]][pulo[1]] = '-'
+
+
+    else:
+        linha_origem, coluna_origem = getRandomPosIA(jogo.tabuleiro)
+        opcionais = jogo.movimentos_possiveis(getRandomPosIA(jogo.tabuleiro))
+
+        linha_dest = opcionais[0][0][0]
+        coluna_dest = opcionais[0][0][1]
+
+        y_origem = ALTURA / 8 * linha_origem
+        x_origem = ALTURA / 8 * coluna_origem
+
+        y_d = ALTURA / 8 * linha_dest
+        x_d = ALTURA / 8 * coluna_dest
+
+        y_dest = int(ALTURA / 8) * linha_dest + int(ALTURA / 16)
+        x_dest = int(ALTURA / 8) * coluna_dest + int(ALTURA / 16)
+
+        y = int(ALTURA / 8) * linha_origem + int(ALTURA / 16)
+        x = int(ALTURA / 8) * coluna_origem + int(ALTURA / 16)
+
+        pygame.draw.rect(tela, YELLOW, (x_origem, y_origem, 80, 80))
+        pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
+        pygame.display.update()
+        time.sleep(1)
+        pygame.draw.rect(tela, VERDE_ESCURO, (x_d, y_d, 80, 80))
+        pygame.draw.rect(tela, VERDE_ESCURO, (x_origem, y_origem, 80, 80))
+        pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
+        pygame.display.update()
+        time.sleep(1)
+
+        char = jogo.tabuleiro[linha_origem][coluna_origem]
+        jogo.tabuleiro[linha_dest][coluna_dest] = char
+        jogo.tabuleiro[linha_origem][coluna_origem] = '-'
+
+        if (linha_dest == 7):
+            if not jogo.movimentos_possiveis((linha_dest, coluna_dest))[0]:
+                jogo.tabuleiro[linha_dest][coluna_dest] = char.upper()
+
+        jogo.cedula_selecionada = None
+
+    jogo.proximo_turno()
+
+    vencedor = jogo.verifica_vencedor()
+
+    if vencedor != None:
+        jogo.estado = ('game over')
+
+    return jogo
 
 def loop_jogo():
     sair = False
@@ -395,13 +523,18 @@ def loop_jogo():
     jogo = Jogo()
 
     while not sair:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                sair = True
-                pygame.quit()
-                quit()
-            if evento.type == pygame.MOUSEBUTTONDOWN:
-                jogo.jogadas(pygame.mouse.get_pos())
+        #print (jogo.jogadores[jogo.turno % 2])
+        if jogo.jogadores[jogo.turno % 2] == 'o':
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    sair = True
+                    pygame.quit()
+                    quit()
+                if evento.type == pygame.MOUSEBUTTONDOWN:
+                    jogo.jogadas(pygame.mouse.get_pos())
+        else:
+            time.sleep(1)
+            jogo = IAsimples(jogo)
 
         tela.fill(PRETO)
         jogo.desenha()
