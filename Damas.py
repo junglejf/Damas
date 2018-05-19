@@ -74,65 +74,46 @@ class Jogo:
                 if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
                     self.cedula_selecionada = [linha, coluna]
 
-    def is_movimento_valido(self, jogador, localizacao_cedula, linha_destino, coluna_destino):
-
-        linha_originaria = localizacao_cedula[0]
-        coluna_originaria = localizacao_cedula[1]
-
-        obrigatorios = self.todos_obrigatorios()
-
-        if obrigatorios != {}:
-            if (linha_originaria, coluna_originaria) not in obrigatorios:
+    def is_movimento_valido(self, jogador, orig, L_dest, C_dest):
+        movs_obrigs = self.todos_obrigatorios()
+        if movs_obrigs != {}:
+            if (orig[0],orig[1]) not in movs_obrigs:
                 return False, None
-            elif [linha_destino, coluna_destino] not in obrigatorios[(linha_originaria, coluna_originaria)]:
+            elif [L_dest, C_dest] not in movs_obrigs[(orig[0],orig[1])]:
                 return False, None
-
-        movimento, pulo = self.movimentos_possiveis(localizacao_cedula)
-
-        if [linha_destino, coluna_destino] in movimento:
-            if pulo:
-                if len(pulo) == 1:
-                    return True, pulo[0]
-                else:
-                    for i in range(len(pulo)):
-                        if abs(pulo[i][0] - linha_destino) == 1 and abs(pulo[i][1] - coluna_destino) == 1:
-                            return True, pulo[i]
-
+        movimento, pulo = self.movimentos_possiveis(orig)
+        if [L_dest, C_dest] in movimento:
+            if (pulo and len(pulo)) == 1:
+                return True, pulo[0]
+            else:
+                for i in range(len(pulo)):
+                    if abs(pulo[i][0] - L_dest) == 1 and abs(pulo[i][1] - C_dest) == 1:
+                        return True, pulo[i]
             if self.pulando:
                 return False, None
-
             return True, None
-
         return False, None
 
     def proximo_turno(self):
         self.turno += 1
 
-    def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
-        linha_atual = localizacao_cedula[0]
-        coluna_atual = localizacao_cedula[1]
-        char = self.tabuleiro[linha_atual][coluna_atual]
-
-        self.tabuleiro[linha_destino][coluna_destino] = char
-        self.tabuleiro[linha_atual][coluna_atual] = '-'
-
+    def jogar(self, jogador, localizacao_cedula, L_dest, C_dest, pulo):
+        char = self.tabuleiro[localizacao_cedula[0]][localizacao_cedula[1]]
+        self.tabuleiro[L_dest][C_dest] = char
+        self.tabuleiro[localizacao_cedula[0]][localizacao_cedula[1]] = '-'
         if pulo:
             self.pulando = True
-
-        if (linha_destino == 0):
-            if not self.movimentos_possiveis((linha_destino, coluna_destino))[0]:
-                self.tabuleiro[linha_destino][coluna_destino] = char.upper()
-
+        if (jogador == 'x' and L_dest == 7) or (jogador == 'o' and L_dest == 0):
+            if not self.movimentos_possiveis((L_dest,C_dest))[0]:
+                self.tabuleiro[L_dest][C_dest] = char.upper()
         if pulo:
             self.tabuleiro[pulo[0]][pulo[1]] = '-'
-            self.cedula_selecionada = [linha_destino, coluna_destino]
+            self.cedula_selecionada = [L_dest,C_dest]
             self.pulando = True
-
         else:
             self.cedula_selecionada = None
             self.proximo_turno()
         vencedor = self.verifica_vencedor()
-
         if vencedor != None:
             self.estado = ('game over')
 
