@@ -101,8 +101,6 @@ class Jogo:
         char = self.tabuleiro[localizacao_cedula[0]][localizacao_cedula[1]]
         self.tabuleiro[L_dest][C_dest] = char
         self.tabuleiro[localizacao_cedula[0]][localizacao_cedula[1]] = '-'
-        if pulo:
-            self.pulando = True
         if (jogador == 'x' and L_dest == 7) or (jogador == 'o' and L_dest == 0):
             if not self.movimentos_possiveis((L_dest,C_dest))[0]:
                 self.tabuleiro[L_dest][C_dest] = char.upper()
@@ -586,6 +584,7 @@ def IAsimples(jogo):
     pulo = []
     obrigatorios = jogo.todos_obrigatorios()
     if obrigatorios != {}:
+        print('Obrigatorios nao vazio')
         for i in range(len(jogo.tabuleiro)):
             for j in range(len(jogo.tabuleiro[1])):
                 if(i,j) in obrigatorios:
@@ -594,8 +593,6 @@ def IAsimples(jogo):
                     resp = obrigatorios[(i,j)]
                     linha_dest = resp[0][0]
                     coluna_dest = resp[0][1]
-                    print ('posicao origem: (', linha_origem, ',', coluna_origem, ')')
-                    print ('posicao destino: (', linha_dest, ',', coluna_dest, ')')
                     break
 
         y_origem = ALTURA / 8 * linha_origem
@@ -613,15 +610,15 @@ def IAsimples(jogo):
         pygame.draw.rect(tela, YELLOW, (x_origem, y_origem, 80, 80))
         pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
         pygame.display.update()
-        time.sleep(1)
+        time.sleep(0.5)
         pygame.draw.circle(tela, FOSCO, (int(x_dest), int(y_dest)), TAMANHO_DAMA, 0)
         pygame.display.update()
-        time.sleep(1)
+        time.sleep(0.5)
         pygame.draw.rect(tela, VERDE_ESCURO, (x_d, y_d, 80, 80))
         pygame.draw.rect(tela, VERDE_ESCURO, (x_origem, y_origem, 80, 80))
         pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
         pygame.display.update()
-        time.sleep(1)
+        time.sleep(0.5)
 
 
         char = jogo.tabuleiro[linha_origem][coluna_origem]
@@ -643,8 +640,12 @@ def IAsimples(jogo):
 
         jogo.tabuleiro[pulo[0]][pulo[1]] = '-'
 
+        jogo.cedula_selecionada = [linha_dest, coluna_dest]
+        jogo = IAsimples(jogo)
 
-    else:
+
+    elif obrigatorios == {} and jogo.cedula_selecionada == None:
+        print ('obrigatorios vazio e nenhuma cedula selecionada')
         linha_origem, coluna_origem = getRandomPosIA(jogo.tabuleiro)
         if linha_origem != None and coluna_origem != None:
             envia = [linha_origem, coluna_origem]
@@ -688,6 +689,9 @@ def IAsimples(jogo):
         else:
             jogo.estado = ('game over')
             return jogo
+    else:
+        print('Obrigatorios vazio e alguma cedula selecionada')
+        jogo.cedula_selecionada = None
     jogo.proximo_turno()
     vencedor = jogo.verifica_vencedor()
 
@@ -712,7 +716,8 @@ def loop_jogo():
                 if evento.type == pygame.MOUSEBUTTONDOWN:
                     jogo.jogadas(pygame.mouse.get_pos())
         else:
-            time.sleep(1)
+            #jogo.cedula_selecionada = None
+            time.sleep(0.5)
             jogo = IAsimples(jogo)
 
         tela.fill(PRETO)
