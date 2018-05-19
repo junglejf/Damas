@@ -580,7 +580,7 @@ def getRandomPosIA(tabuleiro):
     print(linha_v[i], ',', coluna_v[i])
     return linha_v[i], coluna_v[i]
 
-def IAsimples(jogo):
+def IAsimples(jogo, vez):
     pulo = []
     obrigatorios = jogo.todos_obrigatorios()
     if obrigatorios != {}:
@@ -639,12 +639,13 @@ def IAsimples(jogo):
                 jogo.tabuleiro[linha_dest][coluna_dest] = char.upper()
 
         jogo.tabuleiro[pulo[0]][pulo[1]] = '-'
-
+        pygame.display.update()
+        #time.sleep(2)
         jogo.cedula_selecionada = [linha_dest, coluna_dest]
-        jogo = IAsimples(jogo)
+        jogo = IAsimples(jogo,2)
 
 
-    elif obrigatorios == {} and jogo.cedula_selecionada == None:
+    elif obrigatorios == {} and jogo.cedula_selecionada == None and vez ==1:
         print ('obrigatorios vazio e nenhuma cedula selecionada')
         linha_origem, coluna_origem = getRandomPosIA(jogo.tabuleiro)
         if linha_origem != None and coluna_origem != None:
@@ -692,7 +693,7 @@ def IAsimples(jogo):
     else:
         print('Obrigatorios vazio e alguma cedula selecionada')
         jogo.cedula_selecionada = None
-    jogo.proximo_turno()
+    #jogo.proximo_turno()
     vencedor = jogo.verifica_vencedor()
 
     if vencedor != None:
@@ -718,7 +719,8 @@ def loop_jogo():
         else:
             #jogo.cedula_selecionada = None
             time.sleep(0.5)
-            jogo = IAsimples(jogo)
+            jogo = IAsimples(jogo, 1)
+            jogo.proximo_turno()
 
         tela.fill(PRETO)
         jogo.desenha()
