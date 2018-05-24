@@ -45,10 +45,10 @@ class Jogo:
         self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
                           ['-', 'x', '-', 'x', '-', 'x', '-', 'x'],
                           ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', '-', '-', '-', '-', '-', '-', '-'],
-                          ['-', '-', '-', '-', '-', '-', '-', '-'],
+                          ['-', '-', '-', '-', '-', 'o', '-', '-'],
+                          ['-', '-', 'o', '-', '-', '-', '-', '-'],
                           ['-', 'o', '-', 'o', '-', 'o', '-', 'o'],
-                          ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
+                          ['o', '-', 'o', '-', '-', '-', 'o', '-'],
                           ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
 
     def getTabuleiro(self):
@@ -102,8 +102,12 @@ class Jogo:
         self.tabuleiro[L_dest][C_dest] = char
         self.tabuleiro[localizacao_cedula[0]][localizacao_cedula[1]] = '-'
         if (jogador == 'x' and L_dest == 7) or (jogador == 'o' and L_dest == 0):
-            if not self.movimentos_possiveis((L_dest,C_dest))[0]:
+            print('Fazendo dama')
+            if self.movimentos_possiveis((L_dest,C_dest))[0] == localizacao_cedula:
+                print('agora eh dama!')
                 self.tabuleiro[L_dest][C_dest] = char.upper()
+            else:
+                print(self.movimentos_possiveis((L_dest, C_dest)))
         if pulo:
             self.tabuleiro[pulo[0]][pulo[1]] = '-'
             self.cedula_selecionada = [L_dest,C_dest]
@@ -129,6 +133,23 @@ class Jogo:
                     all[(r, c)] = ob
 
         return all
+
+
+
+
+    def todos_obrigatorios_IA(self):
+        all = {}
+
+        for r in range(len(self.tabuleiro)):
+            for c in range(len(self.tabuleiro[r])):
+                ob, pulos = self.movimento_obrigatorio((r, c))
+                if ob != []:
+                    all[(r, c)] = ob
+                    break
+
+        return all
+
+
         # RETORNA OS MOVIMENTOS OBRIGATORIOS DE UMA PECA QUE PODE SER JOGADA EM DETERMINADO TURNO
     def movimento_obrigatorio(self, localizacao_cedula):
         obrigatorios = []
@@ -322,7 +343,6 @@ class Jogo:
                         if coluna_atual > 0:
                             if self.tabuleiro[linha_atual - 1][coluna_atual - 1] == '-':
                                 movimentos.append([linha_atual - 1, coluna_atual - 1])
-
                 elif self.tabuleiro[linha_atual][coluna_atual] == 'x':
                     if linha_atual < 7:
                         if coluna_atual < 7:
@@ -582,9 +602,22 @@ def getRandomPosIA(tabuleiro):
 
 def IAsimples(jogo, vez):
     pulo = []
-    obrigatorios = jogo.todos_obrigatorios()
-    if obrigatorios != {}:
+    if(jogo.cedula_selecionada != None):
+        obrigatorios = jogo.movimento_obrigatorio(jogo.cedula_selecionada)
+        if obrigatorios != ([],[]):
+            linha_origem = jogo.cedula_selecionada[0]
+            coluna_origem = jogo.cedula_selecionada[1]
+            linha_dest = obrigatorios[0][0][0]
+            coluna_dest = obrigatorios[0][0][1]
+        else:
+            jogo.cedula_selecionada = None
+            return jogo
+    else:
+        obrigatorios = jogo.todos_obrigatorios_IA()
+           
+    if obrigatorios != {}: 
         print('Obrigatorios nao vazio')
+        print(obrigatorios)
         for i in range(len(jogo.tabuleiro)):
             for j in range(len(jogo.tabuleiro[1])):
                 if(i,j) in obrigatorios:
@@ -635,12 +668,13 @@ def IAsimples(jogo, vez):
             pulo.append(coluna_origem - 1)
 
         if (linha_dest == 7):
-            if not jogo.movimentos_possiveis((linha_dest, coluna_dest))[0]:
+            if jogo.movimentos_possiveis((linha_dest, coluna_dest))[0] == None:
                 jogo.tabuleiro[linha_dest][coluna_dest] = char.upper()
 
         jogo.tabuleiro[pulo[0]][pulo[1]] = '-'
         pygame.display.update()
         #time.sleep(2)
+        print ('passei aqui')
         jogo.cedula_selecionada = [linha_dest, coluna_dest]
         jogo = IAsimples(jogo,2)
 
@@ -682,7 +716,7 @@ def IAsimples(jogo, vez):
             jogo.tabuleiro[linha_origem][coluna_origem] = '-'
 
             if (linha_dest == 7):
-                if not jogo.movimentos_possiveis((linha_dest, coluna_dest))[0]:
+                if jogo.movimentos_possiveis((linha_dest, coluna_dest))[0] == None:
                     jogo.tabuleiro[linha_dest][coluna_dest] = char.upper()
 
             jogo.cedula_selecionada = None
