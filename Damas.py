@@ -43,13 +43,13 @@ class Jogo:
         self.cedula_selecionada = None
         self.pulando = False
         self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', 'x', '-', 'x', '-', 'x', '-', 'x'],
-                          ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', '-', '-', '-', '-', 'o', '-', '-'],
-                          ['-', '-', 'o', '-', '-', '-', '-', '-'],
-                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o'],
-                          ['o', '-', 'o', '-', '-', '-', 'o', '-'],
-                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
+                          ['-', '-', '-', 'x', '-', 'x', '-', 'x'],
+                          ['x', '-', 'x', '-', '-', '-', 'x', '-'],
+                          ['-', '-', '-', '-', '-', 'o', '-', 'x'],
+                          ['o', '-', 'o', '-', '-', '-', '-', '-'],
+                          ['-', 'o', '-', '-', '-', 'o', '-', 'x'],
+                          ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
+                          ['-', 'o', '-', 'o', '-', '-', '-', 'o']]
 
     def getTabuleiro(self):
         return self.tabuleiro
@@ -601,6 +601,7 @@ def getRandomPosIA(tabuleiro):
     return linha_v[i], coluna_v[i]
 
 def IAsimples(jogo, vez):
+    printTabuleiro(jogo.tabuleiro)
     pulo = []
     if(jogo.cedula_selecionada != None):
         obrigatorios = jogo.movimento_obrigatorio(jogo.cedula_selecionada)
@@ -733,7 +734,15 @@ def IAsimples(jogo, vez):
     if vencedor != None:
         jogo.estado = ('game over')
 
+    if(jogo.cedula_selecionada == None and linha_dest==7):
+        print('estou na ultima linha')
+        jogo.tabuleiro[linha_dest][coluna_dest] = jogo.tabuleiro[linha_dest][coluna_dest].upper()
+
     return jogo
+
+def printTabuleiro(tabuleiro):
+    for t in tabuleiro:
+        print (t)
 
 def loop_jogo():
     sair = False
