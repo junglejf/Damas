@@ -42,36 +42,30 @@ class Jogo:
         self.jogadores = ('x', 'o')
         self.cedula_selecionada = None
         self.pulando = False
-        self.tabuleiro = [['x', '-', '-', '-', 'x', '-', 'x', '-'],
-                          ['-', 'x', '-', '-', '-', 'x', '-', 'x'],
-                          ['o', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', '-', '-', '-', '-', 'o', '-', 'x'],
-                          ['x', '-', '-', '-', '-', '-', '-', '-'],
-                          ['-', 'o', '-', 'o', '-', 'o', '-', 'x'],
+        self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
+                          ['-', 'x', '-', 'x', '-', 'x', '-', 'x'],
+                          ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
+                          ['-', '-', '-', '-', '-', '-', '-', '-'],
+                          ['-', '-', '-', '-', '-', '-', '-', '-'],
+                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o'],
                           ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
-                          ['-', 'o', '-', 'o', '-', '-', '-', 'o']]
+                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
 
     def getTabuleiro(self):
         return self.tabuleiro
 
     def jogadas(self, pos):
         if self.estado == "jogando":
-            if self.pulando: 
-               print('pulando')
-            else:
-                print('Nao pulando')
             linha, coluna = linha_clicada(pos), coluna_clicada(pos)
             if self.cedula_selecionada:
                 movimento = self.is_movimento_valido(self.jogadores[self.turno % 2], self.cedula_selecionada, linha,
                                                      coluna)
                 if movimento[0]:
-                    print('movimento eh valido!')
                     self.jogar(self.jogadores[self.turno % 2], self.cedula_selecionada, linha, coluna, movimento[1])
                 elif linha == self.cedula_selecionada[0] and coluna == self.cedula_selecionada[1]:
                     movs = self.movimento_obrigatorio(self.cedula_selecionada)
                     if movs[0] == []:
                         if self.pulando:
-                            print('estou pulando sim')
                             self.pulando = False
                             self.proximo_turno()
                     self.cedula_selecionada = None
@@ -116,7 +110,6 @@ class Jogo:
 
 
     def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
-        print(jogador, localizacao_cedula, linha_destino, coluna_destino, pulo)
         linha_atual = localizacao_cedula[0]
         coluna_atual = localizacao_cedula[1]
         char = self.tabuleiro[linha_atual][coluna_atual]
@@ -129,7 +122,13 @@ class Jogo:
             self.cedula_selecionada = [linha_destino, coluna_destino]
             self.pulando = True
 
-        if not self.movimento_obrigatorio((linha_destino, coluna_destino))[0]:
+            if not self.movimento_obrigatorio((linha_destino, coluna_destino))[0]:
+                if(linha_destino == 0):
+                    self.tabuleiro[linha_destino][coluna_destino] = char.upper()
+                self.pulando = False
+                self.cedula_selecionada = None
+                self.proximo_turno()
+        else:
             if(linha_destino == 0):
                 self.tabuleiro[linha_destino][coluna_destino] = char.upper()
             self.pulando = False
@@ -594,7 +593,6 @@ def getRandomPosIA(tabuleiro):
     linha_v = []
     coluna_v = []
     for i in range(len(tabuleiro)):
-        print('len', tabuleiro[i])
         for j in range(len(tabuleiro[i])):
             if tabuleiro[i][j].lower() == 'x':
                 if i<7:
@@ -625,9 +623,7 @@ def getRandomPosIA(tabuleiro):
                                 linha_v.append(linha)
                                 coluna_v.append(coluna)
                                 
-    print(len(linha_v), ',', len(coluna_v))
     i = random.randrange(0,len(linha_v),1)
-    print(linha_v[i], ',', coluna_v[i])
     return linha_v[i], coluna_v[i]
 
 def IAsimples(jogo, vez):
@@ -646,8 +642,6 @@ def IAsimples(jogo, vez):
         obrigatorios = jogo.todos_obrigatorios_IA()
            
     if obrigatorios != {}: 
-        print('Obrigatorios nao vazio')
-        print(obrigatorios)
         for i in range(len(jogo.tabuleiro)):
             for j in range(len(jogo.tabuleiro[1])):
                 if(i,j) in obrigatorios:
@@ -703,14 +697,11 @@ def IAsimples(jogo, vez):
 
         jogo.tabuleiro[pulo[0]][pulo[1]] = '-'
         pygame.display.update()
-        #time.sleep(2)
-        print ('passei aqui')
         jogo.cedula_selecionada = [linha_dest, coluna_dest]
         jogo = IAsimples(jogo,2)
 
 
     elif obrigatorios == {} and jogo.cedula_selecionada == None and vez ==1:
-        print ('obrigatorios vazio e nenhuma cedula selecionada')
         linha_origem, coluna_origem = getRandomPosIA(jogo.tabuleiro)
         if linha_origem != None and coluna_origem != None:
             envia = [linha_origem, coluna_origem]
@@ -755,16 +746,13 @@ def IAsimples(jogo, vez):
             jogo.estado = ('game over')
             return jogo
     else:
-        print('Obrigatorios vazio e alguma cedula selecionada')
         jogo.cedula_selecionada = None
-    #jogo.proximo_turno()
     vencedor = jogo.verifica_vencedor()
 
     if vencedor != None:
         jogo.estado = ('game over')
 
     if(jogo.cedula_selecionada == None and linha_dest==7):
-        print('estou na ultima linha')
         jogo.tabuleiro[linha_dest][coluna_dest] = jogo.tabuleiro[linha_dest][coluna_dest].upper()
 
     return jogo
@@ -779,7 +767,6 @@ def loop_jogo():
     jogo = Jogo()
 
     while not sair:
-        #print (jogo.jogadores[jogo.turno % 2])
         if jogo.jogadores[jogo.turno % 2] == 'o':
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
