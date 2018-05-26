@@ -42,12 +42,12 @@ class Jogo:
         self.jogadores = ('x', 'o')
         self.cedula_selecionada = None
         self.pulando = False
-        self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', '-', '-', 'x', '-', 'x', '-', 'x'],
-                          ['x', '-', 'x', '-', '-', '-', 'x', '-'],
+        self.tabuleiro = [['x', '-', '-', '-', 'x', '-', 'x', '-'],
+                          ['-', 'x', '-', '-', '-', 'x', '-', 'x'],
+                          ['o', '-', 'x', '-', 'x', '-', 'x', '-'],
                           ['-', '-', '-', '-', '-', 'o', '-', 'x'],
-                          ['o', '-', 'o', '-', '-', '-', '-', '-'],
-                          ['-', 'o', '-', '-', '-', 'o', '-', 'x'],
+                          ['x', '-', '-', '-', '-', '-', '-', '-'],
+                          ['-', 'o', '-', 'o', '-', 'o', '-', 'x'],
                           ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
                           ['-', 'o', '-', 'o', '-', '-', '-', 'o']]
 
@@ -56,16 +56,22 @@ class Jogo:
 
     def jogadas(self, pos):
         if self.estado == "jogando":
+            if self.pulando: 
+               print('pulando')
+            else:
+                print('Nao pulando')
             linha, coluna = linha_clicada(pos), coluna_clicada(pos)
             if self.cedula_selecionada:
                 movimento = self.is_movimento_valido(self.jogadores[self.turno % 2], self.cedula_selecionada, linha,
                                                      coluna)
                 if movimento[0]:
+                    print('movimento eh valido!')
                     self.jogar(self.jogadores[self.turno % 2], self.cedula_selecionada, linha, coluna, movimento[1])
                 elif linha == self.cedula_selecionada[0] and coluna == self.cedula_selecionada[1]:
                     movs = self.movimento_obrigatorio(self.cedula_selecionada)
                     if movs[0] == []:
                         if self.pulando:
+                            print('estou pulando sim')
                             self.pulando = False
                             self.proximo_turno()
                     self.cedula_selecionada = None
@@ -74,50 +80,69 @@ class Jogo:
                 if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
                     self.cedula_selecionada = [linha, coluna]
 
-    def is_movimento_valido(self, jogador, orig, L_dest, C_dest):
-        movs_obrigs = self.todos_obrigatorios()
-        if movs_obrigs != {}:
-            if (orig[0],orig[1]) not in movs_obrigs:
+    def is_movimento_valido(self,jogador, localizacao_cedula, linha_destino, coluna_destino):
+
+        linha_originaria = localizacao_cedula[0]
+        coluna_originaria = localizacao_cedula[1]
+
+        obrigatorios = self.todos_obrigatorios()
+
+        if obrigatorios != {}:
+            if (linha_originaria, coluna_originaria) not in obrigatorios:
                 return False, None
-            elif [L_dest, C_dest] not in movs_obrigs[(orig[0],orig[1])]:
+            elif [linha_destino, coluna_destino] not in obrigatorios[(linha_originaria, coluna_originaria)]:
                 return False, None
-        movimento, pulo = self.movimentos_possiveis(orig)
-        if [L_dest, C_dest] in movimento:
-            if (pulo and len(pulo)) == 1:
-                return True, pulo[0]
-            else:
-                for i in range(len(pulo)):
-                    if abs(pulo[i][0] - L_dest) == 1 and abs(pulo[i][1] - C_dest) == 1:
-                        return True, pulo[i]
+
+        movimento, pulo = self.movimentos_possiveis(localizacao_cedula)
+
+        if [linha_destino, coluna_destino] in movimento:
+            if pulo:
+                if len(pulo) == 1:
+                    return True, pulo[0]
+                else:
+                    for i in range(len(pulo)):
+                        if abs(pulo[i][0] - linha_destino) == 1 and abs(pulo[i][1] - coluna_destino) == 1:
+                            return True, pulo[i]
+
             if self.pulando:
                 return False, None
+
             return True, None
+
         return False, None
 
     def proximo_turno(self):
         self.turno += 1
 
-    def jogar(self, jogador, localizacao_cedula, L_dest, C_dest, pulo):
-        char = self.tabuleiro[localizacao_cedula[0]][localizacao_cedula[1]]
-        self.tabuleiro[L_dest][C_dest] = char
-        self.tabuleiro[localizacao_cedula[0]][localizacao_cedula[1]] = '-'
-        if (jogador == 'x' and L_dest == 7) or (jogador == 'o' and L_dest == 0):
-            print('Fazendo dama')
-            if self.movimentos_possiveis((L_dest,C_dest))[0] == localizacao_cedula:
-                print('agora eh dama!')
-                self.tabuleiro[L_dest][C_dest] = char.upper()
-            else:
-                print(self.movimentos_possiveis((L_dest, C_dest)))
+
+    def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
+        print(jogador, localizacao_cedula, linha_destino, coluna_destino, pulo)
+        linha_atual = localizacao_cedula[0]
+        coluna_atual = localizacao_cedula[1]
+        char = self.tabuleiro[linha_atual][coluna_atual]
+
+        self.tabuleiro[linha_destino][coluna_destino] = char
+        self.tabuleiro[linha_atual][coluna_atual] = '-'
+
         if pulo:
             self.tabuleiro[pulo[0]][pulo[1]] = '-'
-            self.cedula_selecionada = [L_dest,C_dest]
+            self.cedula_selecionada = [linha_destino, coluna_destino]
             self.pulando = True
-        else:
+
+        if not self.movimento_obrigatorio((linha_destino, coluna_destino))[0]:
+            if(linha_destino == 0):
+                self.tabuleiro[linha_destino][coluna_destino] = char.upper()
+            self.pulando = False
             self.cedula_selecionada = None
             self.proximo_turno()
+
         vencedor = self.verifica_vencedor()
+
         if vencedor != None:
             self.estado = ('game over')
+
+
+
 
     def proximo_turno(self):
         self.turno += 1
@@ -569,6 +594,7 @@ def getRandomPosIA(tabuleiro):
     linha_v = []
     coluna_v = []
     for i in range(len(tabuleiro)):
+        print('len', tabuleiro[i])
         for j in range(len(tabuleiro[i])):
             if tabuleiro[i][j].lower() == 'x':
                 if i<7:
@@ -577,7 +603,11 @@ def getRandomPosIA(tabuleiro):
                             linha, coluna = i, j
                             linha_v.append(linha)
                             coluna_v.append(coluna)
-                    elif j>0:
+                        if tabuleiro[i+1][j-1] == '-':
+                            linha, coluna = i, j
+                            linha_v.append(linha)
+                            coluna_v.append(coluna)
+                    elif j==7:
                         if tabuleiro[i+1][j-1] == '-':
                             linha, coluna = i, j
                             linha_v.append(linha)
@@ -589,8 +619,8 @@ def getRandomPosIA(tabuleiro):
                                 linha, coluna = i, j
                                 linha_v.append(linha)
                                 coluna_v.append(coluna)
-                        elif j>0:
-                            if tabuleiro[i+1][j-1] == '-':
+                        elif j==7:
+                            if tabuleiro[i-1][j-1] == '-':
                                 linha, coluna = i, j
                                 linha_v.append(linha)
                                 coluna_v.append(coluna)
@@ -601,7 +631,6 @@ def getRandomPosIA(tabuleiro):
     return linha_v[i], coluna_v[i]
 
 def IAsimples(jogo, vez):
-    printTabuleiro(jogo.tabuleiro)
     pulo = []
     if(jogo.cedula_selecionada != None):
         obrigatorios = jogo.movimento_obrigatorio(jogo.cedula_selecionada)
