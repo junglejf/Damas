@@ -113,6 +113,7 @@ class Jogo:
         for i in range(len(pulo)):
             if abs(pulo[i][0]- l_dest)==1 and abs(pulo[i][1]-c_dest==1):
                 return True, pulo[i]
+        return False,None #########################
 
     def proximo_turno(self):
         self.turno += 1
@@ -196,6 +197,7 @@ class Jogo:
             k.append([lx + i, lc + j])
             m.append((lx,lc))
             return (k,m)
+        return (obrigs, pulada)
 
     def obrigs_e_pulada(self,obrigatorios,posicao_cedula_pulada,l_x,i,l_c,j):
         #i=-1
