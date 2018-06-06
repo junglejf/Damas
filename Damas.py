@@ -589,48 +589,53 @@ def linha_clicada(pos):
             return i - 1
     return 7
 
+
 def getRandomPosIA(tabuleiro):
     linha_v = []
     coluna_v = []
     for i in range(len(tabuleiro)):
         for j in range(len(tabuleiro[i])):
             if tabuleiro[i][j].lower() == 'x':
-                if i<7:
-                    if j<7:
-                        if tabuleiro[i+1][j+1] == '-':
+                if i < 7:
+                    if j < 7:
+                        if tabuleiro[i + 1][j + 1] == '-':
                             linha, coluna = i, j
                             linha_v.append(linha)
                             coluna_v.append(coluna)
-                        if tabuleiro[i+1][j-1] == '-':
+                        if tabuleiro[i + 1][j - 1] == '-':
                             linha, coluna = i, j
                             linha_v.append(linha)
                             coluna_v.append(coluna)
-                    elif j==7:
-                        if tabuleiro[i+1][j-1] == '-':
+                    elif j == 7:
+                        if tabuleiro[i + 1][j - 1] == '-':
                             linha, coluna = i, j
                             linha_v.append(linha)
                             coluna_v.append(coluna)
                 else:
                     if tabuleiro[i][j] == 'X':
                         if j < 7:
-                            if tabuleiro[i-1][j+1] == '-':
+                            if tabuleiro[i - 1][j + 1] == '-':
                                 linha, coluna = i, j
                                 linha_v.append(linha)
                                 coluna_v.append(coluna)
-                        elif j==7:
-                            if tabuleiro[i-1][j-1] == '-':
+                        elif j == 7:
+                            if tabuleiro[i - 1][j - 1] == '-':
                                 linha, coluna = i, j
                                 linha_v.append(linha)
                                 coluna_v.append(coluna)
-                                
-    i = random.randrange(0,len(linha_v),1)
-    return linha_v[i], coluna_v[i]
+
+    if len(linha_v) > 0:
+        i = random.randrange(0, len(linha_v), 1)
+        return linha_v[i], coluna_v[i]
+    else:
+        return None, None
+
 
 def IAsimples(jogo, vez):
     pulo = []
-    if(jogo.cedula_selecionada != None):
+    if (jogo.cedula_selecionada != None):
         obrigatorios = jogo.movimento_obrigatorio(jogo.cedula_selecionada)
-        if obrigatorios != ([],[]):
+        if obrigatorios != ([], []):
             linha_origem = jogo.cedula_selecionada[0]
             coluna_origem = jogo.cedula_selecionada[1]
             linha_dest = obrigatorios[0][0][0]
@@ -640,14 +645,14 @@ def IAsimples(jogo, vez):
             return jogo
     else:
         obrigatorios = jogo.todos_obrigatorios_IA()
-           
-    if obrigatorios != {}: 
+
+    if obrigatorios != {}:
         for i in range(len(jogo.tabuleiro)):
             for j in range(len(jogo.tabuleiro[1])):
-                if(i,j) in obrigatorios:
+                if (i, j) in obrigatorios:
                     linha_origem = i
                     coluna_origem = j
-                    resp = obrigatorios[(i,j)]
+                    resp = obrigatorios[(i, j)]
                     linha_dest = resp[0][0]
                     coluna_dest = resp[0][1]
                     break
@@ -677,7 +682,6 @@ def IAsimples(jogo, vez):
         pygame.display.update()
         time.sleep(0.5)
 
-
         char = jogo.tabuleiro[linha_origem][coluna_origem]
         jogo.tabuleiro[linha_dest][coluna_dest] = char
         jogo.tabuleiro[linha_origem][coluna_origem] = '-'
@@ -698,15 +702,18 @@ def IAsimples(jogo, vez):
         jogo.tabuleiro[pulo[0]][pulo[1]] = '-'
         pygame.display.update()
         jogo.cedula_selecionada = [linha_dest, coluna_dest]
-        jogo = IAsimples(jogo,2)
+        jogo = IAsimples(jogo, 2)
 
 
-    elif obrigatorios == {} and jogo.cedula_selecionada == None and vez ==1:
+    elif obrigatorios == {} and jogo.cedula_selecionada == None and vez == 1:
         linha_origem, coluna_origem = getRandomPosIA(jogo.tabuleiro)
         if linha_origem != None and coluna_origem != None:
             envia = [linha_origem, coluna_origem]
             opcionais = jogo.movimentos_possiveis(envia)
-
+            if len(opcionais) == 0:
+                jogo.estado = ('game over')
+                return jogo
+            print('opcionais', opcionais)
             linha_dest = opcionais[0][0][0]
             coluna_dest = opcionais[0][0][1]
 
@@ -737,7 +744,7 @@ def IAsimples(jogo, vez):
             jogo.tabuleiro[linha_origem][coluna_origem] = '-'
 
             if (linha_dest == 7):
-                if jogo.movimentos_possiveis((linha_dest, coluna_dest))[0] == None:
+                if len(jogo.movimentos_possiveis((linha_dest, coluna_dest))[0]) == 0:
                     jogo.tabuleiro[linha_dest][coluna_dest] = char.upper()
 
             jogo.cedula_selecionada = None
@@ -752,7 +759,7 @@ def IAsimples(jogo, vez):
     if vencedor != None:
         jogo.estado = ('game over')
 
-    if(jogo.cedula_selecionada == None and linha_dest==7):
+    if (jogo.cedula_selecionada == None and linha_dest == 7):
         jogo.tabuleiro[linha_dest][coluna_dest] = jogo.tabuleiro[linha_dest][coluna_dest].upper()
 
     return jogo
