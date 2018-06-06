@@ -185,38 +185,58 @@ class Jogo:
     def eh_dama(self,linha,coluna,jogador):
         return self.tabuleiro[linha][coluna].isupper() and self.tabuleiro[linha][coluna] == jogador.upper()
 
+    def eh_casa_vazia(self,l,c):
+        return self.tabuleiro[l][c]=='-'
+
+
+
+    def verifica_e_add_obrigatorios(self,cond,obrigs,pulada,lx,i,lc,j):
+        if cond:
+            k=obrigs
+            m=pulada
+            k.append([lx + i, lc + j])
+            m.append((lx,lc))
+            return (k,m)
+
+    def i_899(self,obrigatorios,posicao_cedula_pulada,l_x,i,l_c,j):
+        #i=-1
+        #j=+1
+        obrigatorios.append([l_x +i, l_c + j])
+        posicao_cedula_pulada.append((l_x, l_c))
+        return obrigatorios,posicao_cedula_pulada
+
         # RETORNA OS MOVIMENTOS OBRIGATORIOS DE UMA PECA QUE PODE SER JOGADA EM DETERMINADO TURNO
     def movimento_obrigatorio(self, localizacao_cedula):
         obrigatorios = []
         posicao_cedula_pulada = []
-
         l = localizacao_cedula[0]#posicao da pedra
         c = localizacao_cedula[1]
-
         jogador = self.jogadores[self.turno % 2]#quem é a vez
         index = self.jogadores.index(jogador)#cont de quem é o jogador
-
         array = [jogador.lower(), jogador.upper(), '-']#indica quem e a vez
+        iI(posicao_cedula_pulada)
         if  self.nao_eh_dama(l,c,jogador) and self.eh_a_vez(index):
             if l > 0:
                 if c < 7:
                     if self.tabuleiro[l - 1][c + 1].lower() not in array:
+                        #lx l i y lc c j w
                         l_x = l - 1
                         l_c = c + 1
-
-                        if l_x - 1 >= 0 and l_c + 1 <= 7:
-                            if self.tabuleiro[l_x - 1][l_c + 1] == '-':
-                                obrigatorios.append([l_x - 1, l_c + 1])
-                                posicao_cedula_pulada.append((l_x, l_c))
+                        if l_x - 1 >= 0 and l_c + 1 <= 7: #(lx;-1;0;lc;+1;7)
+                            if self.eh_casa_vazia(l_x - 1,l_c + 1):
+                                obrigatorios,posicao_cedula_pulada=self.i_899(obrigatorios,posicao_cedula_pulada,l_x,-1,l_c,+1)
+                                #obrigatorios.append([l_x - 1, l_c + 1])
+                                #posicao_cedula_pulada.append((l_x, l_c))
                 if c > 0:
                     if self.tabuleiro[l - 1][c - 1].lower() not in array:
                         l_x = l - 1
                         l_c = c - 1
-
                         if l_x - 1 >= 0 and l_c - 1 >= 0:
-                            if self.tabuleiro[l_x - 1][l_c - 1] == '-':
-                                obrigatorios.append([l_x - 1, l_c - 1])
-                                posicao_cedula_pulada.append((l_x, l_c))
+                            if self.eh_casa_vazia(l_x - 1,l_c - 1):
+                                obrigatorios, posicao_cedula_pulada = self.i_899(obrigatorios, posicao_cedula_pulada,
+                                                                                 l_x, -1, l_c, -1)
+                                #obrigatorios.append([l_x - 1, l_c - 1])
+                                #posicao_cedula_pulada.append((l_x, l_c))
             if l < 7:
                 if c < 7:
                     if self.tabuleiro[l + 1][c + 1].lower() not in array:
@@ -224,18 +244,22 @@ class Jogo:
                         l_c = c + 1
 
                         if l_x + 1 <= 7 and l_c + 1 <= 7:
-                            if self.tabuleiro[l_x + 1][l_c + 1] == '-':
-                                obrigatorios.append([l_x + 1, l_c + 1])
-                                posicao_cedula_pulada.append((l_x, l_c))
+                            if self.eh_casa_vazia(l_x + 1,l_c + 1):
+                                obrigatorios, posicao_cedula_pulada = self.i_899(obrigatorios, posicao_cedula_pulada,
+                                                                                 l_x, +1, l_c, +1)
+                                #obrigatorios.append([l_x + 1, l_c + 1])
+                                #posicao_cedula_pulada.append((l_x, l_c))
                 if c > 0:
                     if self.tabuleiro[l + 1][c - 1].lower() not in array:
                         l_x = l + 1
                         l_c = c - 1
 
                         if l_x + 1 <= 7 and l_c - 1 >= 0:
-                            if self.tabuleiro[l_x + 1][l_c - 1] == '-':
-                                obrigatorios.append([l_x + 1, l_c - 1])
-                                posicao_cedula_pulada.append((l_x, l_c))
+                            if self.eh_casa_vazia(l_x + 1,l_c - 1):
+                                obrigatorios, posicao_cedula_pulada = self.i_899(obrigatorios, posicao_cedula_pulada,
+                                                                                 l_x, +1, l_c, -1)
+                                #obrigatorios.append([l_x + 1, l_c - 1])
+                                #posicao_cedula_pulada.append((l_x, l_c))
 
 
         elif self.eh_dama(l,c,jogador) and self.eh_a_vez(index) :
@@ -252,13 +276,13 @@ class Jogo:
                             l_c = movimento_y - 1
 
                             if l_x - 1 >= 0 and l_c - 1 >= 0:
-                                if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                if self.eh_casa_vazia(l_x - 1,l_c - 1):
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x - 1 < 0 or l_c - 1 < 0:
                                             break
                                         else:
-                                            if self.tabuleiro[l_x - 1][l_c - 1] == '-':
+                                            if self.eh_casa_vazia(l_x - 1,l_c - 1):
                                                 obrigatorios.append([l_x - 1, l_c - 1])
                                             else:
                                                 break
@@ -279,13 +303,13 @@ class Jogo:
                             l_c = movimento_y + 1
 
                             if l_x - 1 >= 0 and l_c + 1 <= 7:
-                                if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                if self.eh_casa_vazia(l_x - 1,l_c + 1):
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x - 1 < 0 or l_c + 1 > 7:
                                             break
                                         else:
-                                            if self.tabuleiro[l_x - 1][l_c + 1] == '-':
+                                            if self.eh_casa_vazia(l_x - 1,l_c + 1):
                                                 obrigatorios.append([l_x - 1, l_c + 1])
                                             else:
                                                 break
@@ -306,13 +330,13 @@ class Jogo:
                             l_c = movimento_y + 1
 
                             if l_x + 1 <= 7 and l_c + 1 <= 7:
-                                if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                if self.eh_casa_vazia(l_x + 1,l_c + 1):
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x + 1 > 7 or l_c + 1 > 7:
                                             break
                                         else:
-                                            if self.tabuleiro[l_x + 1][l_c + 1] == '-':
+                                            if self.eh_casa_vazia(l_x + 1,l_c + 1):
                                                 obrigatorios.append([l_x + 1, l_c + 1])
                                             else:
                                                 break
@@ -333,13 +357,13 @@ class Jogo:
                             l_c = movimento_y - 1
 
                             if l_x + 1 <= 7 and l_c - 1 >= 0:
-                                if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                if self.eh_casa_vazia(l_x + 1,l_c - 1):
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x + 1 > 7 or l_c - 1 < 0:
                                             break
                                         else:
-                                            if self.tabuleiro[l_x + 1][l_c - 1] == '-':
+                                            if self.eh_casa_vazia(l_x + 1,l_c - 1):
                                                 obrigatorios.append([l_x + 1, l_c - 1])
                                             else:
                                                 break
