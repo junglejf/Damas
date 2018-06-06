@@ -457,6 +457,10 @@ class Jogo:
         # VERIFICA O VENCEDOR
     def verifica_vencedor(self):
 
+            resp1, resp2 = getRandomPosIA(self.tabuleiro)
+            if resp1 == None:
+                return 'o'
+
             x = sum([contador.count('x') + contador.count('X') for contador in self.tabuleiro])
             o = sum([contador.count('o') + contador.count('O') for contador in self.tabuleiro])
 
@@ -646,9 +650,12 @@ def getRandomPosIA(tabuleiro):
                                 linha, coluna = i, j
                                 linha_v.append(linha)
                                 coluna_v.append(coluna)
-                                
-    i = random.randrange(0,len(linha_v),1)
-    return linha_v[i], coluna_v[i]
+
+    if len(linha_v) > 0:
+        i = random.randrange(0,len(linha_v),1)
+        return linha_v[i], coluna_v[i]
+    else:
+        return None, None
 
 def IAsimples(jogo, vez):
     pulo = []
@@ -730,7 +737,10 @@ def IAsimples(jogo, vez):
         if linha_origem != None and coluna_origem != None:
             envia = [linha_origem, coluna_origem]
             opcionais = jogo.movimentos_possiveis(envia)
-
+            if len(opcionais) == 0:
+                jogo.estado = ('game over')
+                return jogo
+            print('opcionais', opcionais)
             linha_dest = opcionais[0][0][0]
             coluna_dest = opcionais[0][0][1]
 
