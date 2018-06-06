@@ -57,60 +57,65 @@ class Jogo:
     def getTabuleiro(self):
         return self.tabuleiro
 
+    def nao_ha_movimento_obrigatorio(self,movs,i):
+        return movs[i]==[]
+
     def jogadas(self, pos):
         if self.estado == "jogando":
-            linha, coluna = linha_clicada(pos), coluna_clicada(pos)
+            linha= linha_clicada(pos)
+            coluna = coluna_clicada(pos)
             if self.cedula_selecionada:
-                movimento = self.is_movimento_valido(self.jogadores[self.turno % 2], self.cedula_selecionada, linha,
-                                                     coluna)
+                movimento = self.is_movimento_valido(self.jogadores[self.turno % 2], self.cedula_selecionada, linha, coluna)
                 if movimento[0]:
                     self.jogar(self.jogadores[self.turno % 2], self.cedula_selecionada, linha, coluna, movimento[1])
                 elif linha == self.cedula_selecionada[0] and coluna == self.cedula_selecionada[1]:
                     movs = self.movimento_obrigatorio(self.cedula_selecionada)
-                    if movs[0] == []:
-                        if self.pulando:
+                    if self.nao_ha_movimento_obrigatorio(movs,0) and self.pulando:
                             self.pulando = False
                             self.proximo_turno()
                     self.cedula_selecionada = None
-
             else:
-                if self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]:
+                if self.eh_a_vez(None,linha,coluna):
                     self.cedula_selecionada = [linha, coluna]
 
-    def is_movimento_valido(self,jogador, localizacao_cedula, linha_destino, coluna_destino):
 
+    def ha_movimentos_obrigatorios(self,ob):
+        return ob != {}
+
+    def nao_esta_em(self,a,b):
+        return a not in b
+
+    def esta_em(self,a,b):
+        return a in b
+
+    def is_movimento_valido(self,jogador, localizacao_cedula, linha_destino, coluna_destino):
         linha_originaria = localizacao_cedula[0]
         coluna_originaria = localizacao_cedula[1]
-
         obrigatorios = self.todos_obrigatorios()
-
-        if obrigatorios != {}:
-            if (linha_originaria, coluna_originaria) not in obrigatorios:
+        if self.ha_movimentos_obrigatorios(obrigatorios):
+            if self.nao_esta_em((linha_originaria, coluna_originaria),obrigatorios):
                 return False, None
-            elif [linha_destino, coluna_destino] not in obrigatorios[(linha_originaria, coluna_originaria)]:
+            elif self.nao_esta_em([linha_destino, coluna_destino],obrigatorios[(linha_originaria, coluna_originaria)]):
                 return False, None
-
         movimento, pulo = self.movimentos_possiveis(localizacao_cedula)
-
-        if [linha_destino, coluna_destino] in movimento:
+        if self.esta_em([linha_destino, coluna_destino],movimento):
             if pulo:
                 if len(pulo) == 1:
                     return True, pulo[0]
                 else:
-                    for i in range(len(pulo)):
-                        if abs(pulo[i][0] - linha_destino) == 1 and abs(pulo[i][1] - coluna_destino) == 1:
-                            return True, pulo[i]
-
+                    return self.calcula_pulo(pulo,linha_destino,coluna_destino)
             if self.pulando:
                 return False, None
-
             return True, None
-
         return False, None
+
+    def calcula_pulo(self,pulo,l_dest,c_dest):
+        for i in range(len(pulo)):
+            if abs(pulo[i][0]- l_dest)==1 and abs(pulo[i][1]-c_dest==1):
+                return True, pulo[i]
 
     def proximo_turno(self):
         self.turno += 1
-
 
     def jogar(self, jogador, localizacao_cedula, linha_destino, coluna_destino, pulo):
         linha_atual = localizacao_cedula[0]
@@ -143,26 +148,18 @@ class Jogo:
         if vencedor != None:
             self.estado = ('game over')
 
-
-
-
     def proximo_turno(self):
         self.turno += 1
 
         # RETORNA TODOS OS MOVIMENTOS OBRIGATORIOS DE UM TURNO
     def todos_obrigatorios(self):
         all = {}
-
         for r in range(len(self.tabuleiro)):
             for c in range(len(self.tabuleiro[r])):
                 ob, pulos = self.movimento_obrigatorio((r, c))
                 if ob != []:
                     all[(r, c)] = ob
-
         return all
-
-
-
 
     def todos_obrigatorios_IA(self):
         all = {}
@@ -176,8 +173,10 @@ class Jogo:
 
         return all
 
-    def eh_a_vez(self,indice):
-        return self.turno%2 ==indice
+    def eh_a_vez(self,indice,linha,coluna):
+        if linha==None or coluna==None:
+            return self.turno%2 ==indice
+        return self.tabuleiro[linha][coluna].lower() == self.jogadores[self.turno % 2]
 
     def nao_eh_dama(self,linha,coluna,jogador):
         return self.tabuleiro[linha][coluna].islower() and self.tabuleiro[linha][coluna]==jogador
@@ -205,6 +204,30 @@ class Jogo:
         posicao_cedula_pulada.append((l_x, l_c))
         return obrigatorios,posicao_cedula_pulada
 
+    def i_900(self,obrigatorios,posicao_cedula_pulada,u,i,v,j,cond):
+        if cond and self.eh_casa_vazia((u) + i, (v) + j):
+            return self.i_899(obrigatorios,posicao_cedula_pulada,(u),i,(v),j)
+        return obrigatorios,posicao_cedula_pulada
+
+    def i_901(self,obrigatorios,posicao_cedula_pulada,u,i,v,j,cond,array):
+        if self.tabuleiro[u][v].lower() not in array:
+            return self.i_900(obrigatorios,posicao_cedula_pulada,u,i,v,j,cond)
+        return obrigatorios,posicao_cedula_pulada
+
+    def i_903(self, cond, l_x, i, l_c, j, obrig, pulada):
+        pulada.append((l_x, l_c))
+        while True:
+            if cond:
+                break
+            else:
+                if self.eh_casa_vazia(l_x + i, l_c + j):
+                    obrig.append([l_x + i, l_c + j])
+                else:
+                    break
+            l_x = l_x + i
+            l_c = l_c + j
+        return l_x, l_c, obrig, pulada
+
         # RETORNA OS MOVIMENTOS OBRIGATORIOS DE UMA PECA QUE PODE SER JOGADA EM DETERMINADO TURNO
     def movimento_obrigatorio(self, localizacao_cedula):
         obrigatorios = []
@@ -215,68 +238,35 @@ class Jogo:
         index = self.jogadores.index(jogador)#cont de quem é o jogador
         array = [jogador.lower(), jogador.upper(), '-']#indica quem e a vez
         iI(posicao_cedula_pulada)
-        if  self.nao_eh_dama(l,c,jogador) and self.eh_a_vez(index):
+        if  self.nao_eh_dama(l,c,jogador) and self.eh_a_vez(index,None,None):
             if l > 0:
                 if c < 7:
-                    if self.tabuleiro[l - 1][c + 1].lower() not in array:
-                        #lx l i y lc c j w
-                        l_x = l - 1
-                        l_c = c + 1
-                        if l_x - 1 >= 0 and l_c + 1 <= 7: #(lx;-1;0;lc;+1;7)
-                            if self.eh_casa_vazia(l_x - 1,l_c + 1):
-                                obrigatorios,posicao_cedula_pulada=self.i_899(obrigatorios,posicao_cedula_pulada,l_x,-1,l_c,+1)
-                                #obrigatorios.append([l_x - 1, l_c + 1])
-                                #posicao_cedula_pulada.append((l_x, l_c))
+                    obrigatorios,posicao_cedula_pulada=self.i_901(obrigatorios,posicao_cedula_pulada,(l - 1),-1,(c + 1),+1,(l - 1) - 1 >= 0 and (c + 1) + 1 <= 7,array)
                 if c > 0:
-                    if self.tabuleiro[l - 1][c - 1].lower() not in array:
-                        l_x = l - 1
-                        l_c = c - 1
-                        if l_x - 1 >= 0 and l_c - 1 >= 0:
-                            if self.eh_casa_vazia(l_x - 1,l_c - 1):
-                                obrigatorios, posicao_cedula_pulada = self.i_899(obrigatorios, posicao_cedula_pulada,
-                                                                                 l_x, -1, l_c, -1)
-                                #obrigatorios.append([l_x - 1, l_c - 1])
-                                #posicao_cedula_pulada.append((l_x, l_c))
+                    obrigatorios, posicao_cedula_pulada = self.i_901(obrigatorios, posicao_cedula_pulada, (l - 1),
+                                                                         -1, (c - 1), -1,
+                                                                         (l - 1) - 1 >= 0 and (c - 1) - 1 >= 0,array)
             if l < 7:
                 if c < 7:
-                    if self.tabuleiro[l + 1][c + 1].lower() not in array:
-                        l_x = l + 1
-                        l_c = c + 1
-
-                        if l_x + 1 <= 7 and l_c + 1 <= 7:
-                            if self.eh_casa_vazia(l_x + 1,l_c + 1):
-                                obrigatorios, posicao_cedula_pulada = self.i_899(obrigatorios, posicao_cedula_pulada,
-                                                                                 l_x, +1, l_c, +1)
-                                #obrigatorios.append([l_x + 1, l_c + 1])
-                                #posicao_cedula_pulada.append((l_x, l_c))
+                    obrigatorios, posicao_cedula_pulada = self.i_901(obrigatorios, posicao_cedula_pulada, (l + 1),
+                                                                         +1, (c + 1), +1,
+                                                                         (l + 1) + 1 <= 7 and (c + 1) + 1 <= 7,array)
                 if c > 0:
-                    if self.tabuleiro[l + 1][c - 1].lower() not in array:
-                        l_x = l + 1
-                        l_c = c - 1
-
-                        if l_x + 1 <= 7 and l_c - 1 >= 0:
-                            if self.eh_casa_vazia(l_x + 1,l_c - 1):
-                                obrigatorios, posicao_cedula_pulada = self.i_899(obrigatorios, posicao_cedula_pulada,
-                                                                                 l_x, +1, l_c, -1)
-                                #obrigatorios.append([l_x + 1, l_c - 1])
-                                #posicao_cedula_pulada.append((l_x, l_c))
-
-
-        elif self.eh_dama(l,c,jogador) and self.eh_a_vez(index) :
-
+                    obrigatorios, posicao_cedula_pulada = self.i_901(obrigatorios, posicao_cedula_pulada, (l + 1),+1, (c - 1), -1,(l + 1) + 1 <= 7 and (c - 1) - 1 >= 0,array)
+        elif self.eh_dama(l,c,jogador) and self.eh_a_vez(index,None,None) :
             if not self.pulando and (jogador.lower() == 'x' and l != 7) or (jogador.lower() == 'o' and l != 0):
                 movimento_x = l
                 movimento_y = c
                 while True:
                     if movimento_x - 1 < 0 or movimento_y - 1 < 0:
-                        break
+                       break
                     else:
                         if self.tabuleiro[movimento_x - 1][movimento_y - 1] not in array:
                             l_x = movimento_x - 1
                             l_c = movimento_y - 1
-
                             if l_x - 1 >= 0 and l_c - 1 >= 0:
-                                if self.eh_casa_vazia(l_x - 1,l_c - 1):
+                                if self.eh_casa_vazia(l_x - 1,l_c - 1):#TTTTTTTT
+                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.i_903(l_x - 1 < 0 or l_c - 1 < 0, l_x,-1, l_c,-1, obrigatorios, posicao_cedula_pulada)
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x - 1 < 0 or l_c - 1 < 0:
@@ -291,7 +281,6 @@ class Jogo:
                             break
                     movimento_x -= 1
                     movimento_y -= 1
-
                 movimento_x = l
                 movimento_y = c
                 while True:
@@ -301,9 +290,9 @@ class Jogo:
                         if self.tabuleiro[movimento_x - 1][movimento_y + 1] not in array:
                             l_x = movimento_x - 1
                             l_c = movimento_y + 1
-
                             if l_x - 1 >= 0 and l_c + 1 <= 7:
-                                if self.eh_casa_vazia(l_x - 1,l_c + 1):
+                                if self.eh_casa_vazia(l_x - 1,l_c + 1):####TTTTTTTT
+                                #    l_x, l_c, obrigatorios, posicao_cedula_pulada = self.i_903(l_x - 1 < 0 or l_c + 1 > 7, l_x,-1, l_c,+1, obrigatorios, posicao_cedula_pulada)
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x - 1 < 0 or l_c + 1 > 7:
@@ -318,7 +307,6 @@ class Jogo:
                             break
                     movimento_x -= 1
                     movimento_y += 1
-
                 movimento_x = l
                 movimento_y = c
                 while True:
@@ -328,9 +316,11 @@ class Jogo:
                         if self.tabuleiro[movimento_x + 1][movimento_y + 1] not in array:
                             l_x = movimento_x + 1
                             l_c = movimento_y + 1
-
                             if l_x + 1 <= 7 and l_c + 1 <= 7:
-                                if self.eh_casa_vazia(l_x + 1,l_c + 1):
+                                if self.eh_casa_vazia(l_x + 1,l_c + 1):##########TTTTTTTTTTTTTTTTTT
+                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.i_903(
+                                    #    l_x + 1 > 7 or l_c + 1 > 7, l_x, +1, l_c, +1, obrigatorios,
+                                    #    posicao_cedula_pulada)
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x + 1 > 7 or l_c + 1 > 7:
@@ -357,7 +347,10 @@ class Jogo:
                             l_c = movimento_y - 1
 
                             if l_x + 1 <= 7 and l_c - 1 >= 0:
-                                if self.eh_casa_vazia(l_x + 1,l_c - 1):
+                                if self.eh_casa_vazia(l_x + 1,l_c - 1):########ttttttttttttttttt
+                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.i_903(
+                                    #    l_x + 1 > 7 or l_c - 1 < 0, l_x, +1, l_c, -1, obrigatorios,
+                                    #    posicao_cedula_pulada)
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x + 1 > 7 or l_c - 1 < 0:
@@ -372,7 +365,6 @@ class Jogo:
                             break
                     movimento_x += 1
                     movimento_y -= 1
-
         return obrigatorios, posicao_cedula_pulada
 
     def existe_possivel(self):
