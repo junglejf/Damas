@@ -197,24 +197,24 @@ class Jogo:
             m.append((lx,lc))
             return (k,m)
 
-    def i_899(self,obrigatorios,posicao_cedula_pulada,l_x,i,l_c,j):
+    def obrigs_e_pulada(self,obrigatorios,posicao_cedula_pulada,l_x,i,l_c,j):
         #i=-1
         #j=+1
         obrigatorios.append([l_x +i, l_c + j])
         posicao_cedula_pulada.append((l_x, l_c))
         return obrigatorios,posicao_cedula_pulada
 
-    def i_900(self,obrigatorios,posicao_cedula_pulada,u,i,v,j,cond):
+    def obrigs_e_pulada_aux(self,obrigatorios,posicao_cedula_pulada,u,i,v,j,cond):
         if cond and self.eh_casa_vazia((u) + i, (v) + j):
-            return self.i_899(obrigatorios,posicao_cedula_pulada,(u),i,(v),j)
+            return self.obrigs_e_pulada(obrigatorios,posicao_cedula_pulada,(u),i,(v),j)
         return obrigatorios,posicao_cedula_pulada
 
-    def i_901(self,obrigatorios,posicao_cedula_pulada,u,i,v,j,cond,array):
+    def tabuleiro_not_in_array(self,obrigatorios,posicao_cedula_pulada,u,i,v,j,cond,array):
         if self.tabuleiro[u][v].lower() not in array:
-            return self.i_900(obrigatorios,posicao_cedula_pulada,u,i,v,j,cond)
+            return self.obrigs_e_pulada_aux(obrigatorios,posicao_cedula_pulada,u,i,v,j,cond)
         return obrigatorios,posicao_cedula_pulada
 
-    def i_903(self, cond, l_x, i, l_c, j, obrig, pulada):
+    def obrigs_e_pulada_segunda_condic(self, cond, l_x, i, l_c, j, obrig, pulada):
         pulada.append((l_x, l_c))
         while True:
             if cond:
@@ -241,18 +241,18 @@ class Jogo:
         if  self.nao_eh_dama(l,c,jogador) and self.eh_a_vez(index,None,None):
             if l > 0:
                 if c < 7:
-                    obrigatorios,posicao_cedula_pulada=self.i_901(obrigatorios,posicao_cedula_pulada,(l - 1),-1,(c + 1),+1,(l - 1) - 1 >= 0 and (c + 1) + 1 <= 7,array)
+                    obrigatorios,posicao_cedula_pulada=self.tabuleiro_not_in_array(obrigatorios,posicao_cedula_pulada,(l - 1),-1,(c + 1),+1,(l - 1) - 1 >= 0 and (c + 1) + 1 <= 7,array)
                 if c > 0:
-                    obrigatorios, posicao_cedula_pulada = self.i_901(obrigatorios, posicao_cedula_pulada, (l - 1),
+                    obrigatorios, posicao_cedula_pulada = self.tabuleiro_not_in_array(obrigatorios, posicao_cedula_pulada, (l - 1),
                                                                          -1, (c - 1), -1,
                                                                          (l - 1) - 1 >= 0 and (c - 1) - 1 >= 0,array)
             if l < 7:
                 if c < 7:
-                    obrigatorios, posicao_cedula_pulada = self.i_901(obrigatorios, posicao_cedula_pulada, (l + 1),
+                    obrigatorios, posicao_cedula_pulada = self.tabuleiro_not_in_array(obrigatorios, posicao_cedula_pulada, (l + 1),
                                                                          +1, (c + 1), +1,
                                                                          (l + 1) + 1 <= 7 and (c + 1) + 1 <= 7,array)
                 if c > 0:
-                    obrigatorios, posicao_cedula_pulada = self.i_901(obrigatorios, posicao_cedula_pulada, (l + 1),+1, (c - 1), -1,(l + 1) + 1 <= 7 and (c - 1) - 1 >= 0,array)
+                    obrigatorios, posicao_cedula_pulada = self.tabuleiro_not_in_array(obrigatorios, posicao_cedula_pulada, (l + 1),+1, (c - 1), -1,(l + 1) + 1 <= 7 and (c - 1) - 1 >= 0,array)
         elif self.eh_dama(l,c,jogador) and self.eh_a_vez(index,None,None) :
             if not self.pulando and (jogador.lower() == 'x' and l != 7) or (jogador.lower() == 'o' and l != 0):
                 movimento_x = l
@@ -266,7 +266,7 @@ class Jogo:
                             l_c = movimento_y - 1
                             if l_x - 1 >= 0 and l_c - 1 >= 0:
                                 if self.eh_casa_vazia(l_x - 1,l_c - 1):#TTTTTTTT
-                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.i_903(l_x - 1 < 0 or l_c - 1 < 0, l_x,-1, l_c,-1, obrigatorios, posicao_cedula_pulada)
+                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.obrigs_e_pulada_segunda_condic(l_x - 1 < 0 or l_c - 1 < 0, l_x,-1, l_c,-1, obrigatorios, posicao_cedula_pulada)
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x - 1 < 0 or l_c - 1 < 0:
@@ -292,7 +292,7 @@ class Jogo:
                             l_c = movimento_y + 1
                             if l_x - 1 >= 0 and l_c + 1 <= 7:
                                 if self.eh_casa_vazia(l_x - 1,l_c + 1):####TTTTTTTT
-                                #    l_x, l_c, obrigatorios, posicao_cedula_pulada = self.i_903(l_x - 1 < 0 or l_c + 1 > 7, l_x,-1, l_c,+1, obrigatorios, posicao_cedula_pulada)
+                                #    l_x, l_c, obrigatorios, posicao_cedula_pulada = self.obrigs_e_pulada_segunda_condic(l_x - 1 < 0 or l_c + 1 > 7, l_x,-1, l_c,+1, obrigatorios, posicao_cedula_pulada)
                                     posicao_cedula_pulada.append((l_x, l_c))
                                     while True:
                                         if l_x - 1 < 0 or l_c + 1 > 7:
@@ -318,7 +318,7 @@ class Jogo:
                             l_c = movimento_y + 1
                             if l_x + 1 <= 7 and l_c + 1 <= 7:
                                 if self.eh_casa_vazia(l_x + 1,l_c + 1):##########TTTTTTTTTTTTTTTTTT
-                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.i_903(
+                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.obrigs_e_pulada_segunda_condic(
                                     #    l_x + 1 > 7 or l_c + 1 > 7, l_x, +1, l_c, +1, obrigatorios,
                                     #    posicao_cedula_pulada)
                                     posicao_cedula_pulada.append((l_x, l_c))
@@ -348,7 +348,7 @@ class Jogo:
 
                             if l_x + 1 <= 7 and l_c - 1 >= 0:
                                 if self.eh_casa_vazia(l_x + 1,l_c - 1):########ttttttttttttttttt
-                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.i_903(
+                                    #l_x, l_c, obrigatorios, posicao_cedula_pulada = self.obrigs_e_pulada_segunda_condic(
                                     #    l_x + 1 > 7 or l_c - 1 < 0, l_x, +1, l_c, -1, obrigatorios,
                                     #    posicao_cedula_pulada)
                                     posicao_cedula_pulada.append((l_x, l_c))
