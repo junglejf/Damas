@@ -237,9 +237,10 @@ class Jogo:
         l = localizacao_cedula[0]#posicao da pedra
         c = localizacao_cedula[1]
         jogador = self.jogadores[self.turno % 2]#quem é a vez
+        himself = [jogador.lower(), jogador.upper()]
         index = self.jogadores.index(jogador)#cont de quem é o jogador
         array = [jogador.lower(), jogador.upper(), '-']#indica quem e a vez
-        iI(posicao_cedula_pulada)
+        #iI(posicao_cedula_pulada)
         if  self.nao_eh_dama(l,c,jogador) and self.eh_a_vez(index,None,None):
             if l > 0:
                 if c < 7:
@@ -256,13 +257,15 @@ class Jogo:
                 if c > 0:
                     obrigatorios, posicao_cedula_pulada = self.tabuleiro_not_in_array(obrigatorios, posicao_cedula_pulada, (l + 1),+1, (c - 1), -1,(l + 1) + 1 <= 7 and (c - 1) - 1 >= 0,array)
         elif self.eh_dama(l,c,jogador) and self.eh_a_vez(index,None,None) :
-            if not self.pulando and (jogador.lower() == 'x' and l != 7) or (jogador.lower() == 'o' and l != 0):
+            if not self.pulando and (jogador.lower() == 'x') or (jogador.lower() == 'o'):
                 movimento_x = l
                 movimento_y = c
                 while True:
                     if movimento_x - 1 < 0 or movimento_y - 1 < 0:
                        break
                     else:
+                        if self.tabuleiro[movimento_x - 1][movimento_y - 1] in himself:
+                            break
                         if self.tabuleiro[movimento_x - 1][movimento_y - 1] not in array:
                             l_x = movimento_x - 1
                             l_c = movimento_y - 1
@@ -289,6 +292,8 @@ class Jogo:
                     if movimento_x - 1 < 0 or movimento_y + 1 > 7:
                         break
                     else:
+                        if self.tabuleiro[movimento_x - 1][movimento_y + 1] in himself:
+                            break
                         if self.tabuleiro[movimento_x - 1][movimento_y + 1] not in array:
                             l_x = movimento_x - 1
                             l_c = movimento_y + 1
@@ -315,6 +320,8 @@ class Jogo:
                     if movimento_x + 1 > 7 or movimento_y + 1 > 7:
                         break
                     else:
+                        if self.tabuleiro[movimento_x + 1][movimento_y + 1] in himself:
+                            break
                         if self.tabuleiro[movimento_x + 1][movimento_y + 1] not in array:
                             l_x = movimento_x + 1
                             l_c = movimento_y + 1
@@ -344,6 +351,8 @@ class Jogo:
                     if movimento_x + 1 > 7 or movimento_y - 1 < 0:
                         break
                     else:
+                        if self.tabuleiro[movimento_x + 1][movimento_y - 1] in himself:
+                            break
                         if self.tabuleiro[movimento_x + 1][movimento_y - 1] not in array:
                             l_x = movimento_x + 1
                             l_c = movimento_y - 1
