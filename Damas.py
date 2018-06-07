@@ -45,14 +45,14 @@ class Jogo:
         self.jogadores = ('x', 'o')
         self.cedula_selecionada = None
         self.pulando = False
-        self.tabuleiro = [['x', '-', '-', '-', '-', '-', 'x', '-'],
-                          ['-', 'x', '-', 'x', '-', '-', '-', 'x'],
-                          ['o', '-', 'o', '-', '-', '-', 'x', '-'],
-                          ['-', '-', '-', 'x', '-', 'x', '-', '-'],
+        self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
+                          ['-', 'x', '-', 'x', '-', 'x', '-', 'x'],
+                          ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
                           ['-', '-', '-', '-', '-', '-', '-', '-'],
-                          ['-', '-', '-', 'o', '-', '-', '-', '-'],
-                          ['o', '-', '-', '-', 'o', '-', 'o', '-'],
-                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
+                          ['-', '-', '-', '-', '-', '-', 'o', '-'],
+                          ['-', 'o', '-', 'o', '-', '-', '-', 'o'],
+                          ['o', '-', 'o', '-', '-', '-', 'o', '-'],
+                          ['-', 'o', '-', 'X', '-', 'o', '-', 'o']]
 
     def getTabuleiro(self):
         return self.tabuleiro
@@ -170,6 +170,7 @@ class Jogo:
                 ob, pulos = self.movimento_obrigatorio((r, c))
                 if ob != []:
                     all[(r, c)] = ob
+                    print (all)
                     break
 
         return all
@@ -640,15 +641,10 @@ def getRandomPosIA(tabuleiro):
                             linha, coluna = i, j
                             linha_v.append(linha)
                             coluna_v.append(coluna)
-                        if tabuleiro[i+1][j-1] == '-':
-                            linha, coluna = i, j
-                            linha_v.append(linha)
-                            coluna_v.append(coluna)
-                    elif j==7:
-                        if tabuleiro[i+1][j-1] == '-':
-                            linha, coluna = i, j
-                            linha_v.append(linha)
-                            coluna_v.append(coluna)
+                    if tabuleiro[i+1][j-1] == '-':
+                        linha, coluna = i, j
+                        linha_v.append(linha)
+                        coluna_v.append(coluna)
                 else:
                     if tabuleiro[i][j] == 'X':
                         if j < 7:
@@ -705,6 +701,13 @@ def IAsimples(jogo, vez):
 
         y = int(ALTURA / 8) * linha_origem + int(ALTURA / 16)
         x = int(ALTURA / 8) * coluna_origem + int(ALTURA / 16)
+
+
+        img = pygame.image.load('coroa.png')
+        img = pygame.transform.scale(img, (60,60))
+
+        if elemento == 'X':
+            tela.blit(img, (x_origem - 36, y_origem - 36))
 
         pygame.draw.rect(tela, YELLOW, (x_origem, y_origem, 80, 80))
         pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
