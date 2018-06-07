@@ -49,10 +49,10 @@ class Jogo:
                           ['-', 'x', '-', 'x', '-', 'x', '-', 'x'],
                           ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
                           ['-', '-', '-', '-', '-', '-', '-', '-'],
-                          ['-', '-', '-', '-', '-', '-', 'o', '-'],
-                          ['-', 'o', '-', 'o', '-', '-', '-', 'o'],
-                          ['o', '-', 'o', '-', '-', '-', 'o', '-'],
-                          ['-', 'o', '-', 'X', '-', 'o', '-', 'o']]
+                          ['-', '-', '-', '-', '-', '-', '-', '-'],
+                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o'],
+                          ['o', '-', 'o', '-', 'o', '-', '-', '-'],
+                          ['-', 'o', '-', 'o', '-', 'o', '-', 'X']]
 
     def getTabuleiro(self):
         return self.tabuleiro
@@ -706,11 +706,10 @@ def IAsimples(jogo, vez):
         img = pygame.image.load('coroa.png')
         img = pygame.transform.scale(img, (60,60))
 
-        if elemento == 'X':
-            tela.blit(img, (x_origem - 36, y_origem - 36))
-
         pygame.draw.rect(tela, YELLOW, (x_origem, y_origem, 80, 80))
         pygame.draw.circle(tela, PRETO, (int(x), int(y)), TAMANHO_DAMA, 0)
+        if jogo.tabuleiro[linha_origem][coluna_origem] == 'X':
+            tela.blit(img, (x_origem, y_origem))
         pygame.display.update()
         time.sleep(0.5)
         pygame.draw.circle(tela, FOSCO, (int(x_dest), int(y_dest)), TAMANHO_DAMA, 0)
@@ -722,24 +721,38 @@ def IAsimples(jogo, vez):
         pygame.display.update()
         time.sleep(0.5)
 
+        print('lo: ', linha_origem, ' co: ', coluna_origem, 'ld: ', linha_dest, 'cd: ', coluna_dest)
+        print(jogo.tabuleiro[linha_origem][coluna_origem])
+        if jogo.tabuleiro[linha_origem][coluna_origem] == 'x':
+            print('eh sim')
+            if linha_dest > linha_origem:
+                pulo.append(linha_origem + 1)
+            else:
+                pulo.append(linha_origem - 1)
+            if coluna_dest > coluna_origem:
+                pulo.append(coluna_origem + 1)
+            else:
+                pulo.append(coluna_origem - 1)
+        else:
+            print('eh nao')
+            if linha_dest > linha_origem:
+                pulo.append(linha_dest - 1)
+            else:
+                pulo.append(linha_dest + 1)
+            if coluna_dest > coluna_origem:
+                pulo.append(coluna_dest - 1)
+            else:
+                pulo.append(coluna_dest + 1)
 
         char = jogo.tabuleiro[linha_origem][coluna_origem]
         jogo.tabuleiro[linha_dest][coluna_dest] = char
         jogo.tabuleiro[linha_origem][coluna_origem] = '-'
 
-        if linha_dest > linha_origem:
-            pulo.append(linha_origem + 1)
-        else:
-            pulo.append(linha_origem - 1)
-        if coluna_dest > coluna_origem:
-            pulo.append(coluna_origem + 1)
-        else:
-            pulo.append(coluna_origem - 1)
-
         if (linha_dest == 7):
             if jogo.movimentos_possiveis((linha_dest, coluna_dest))[0] == None:
                 jogo.tabuleiro[linha_dest][coluna_dest] = char.upper()
 
+        print('pulo: ', pulo)
         jogo.tabuleiro[pulo[0]][pulo[1]] = '-'
         pygame.display.update()
         jogo.cedula_selecionada = [linha_dest, coluna_dest]
