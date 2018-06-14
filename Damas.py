@@ -45,17 +45,19 @@ class Jogo:
         self.jogadores = ('x', 'o')
         self.cedula_selecionada = None
         self.pulando = False
-        self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', 'x', '-', '-', '-', '-', '-', 'x'],
-                          ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', '-', '-', '-', '-', '-', '-', 'o'],
-                          ['-', '-', '-', '-', 'x', '-', '-', '-'],
-                          ['-', 'o', '-', 'o', '-', '-', '-', 'o'],
-                          ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
-                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
-
+        self.tabuleiro = [['-', '-', '-', '-', '-', '-', '-', '-'],
+             ['-', '-', '-', '-', '-', '-', '-', '-'],
+             ['x', '-', '-', '-', 'x', '-', 'x', '-'],
+             ['-', '-', '-', '-', '-', '-', '-', 'o'],
+             ['-', '-', '-', '-', 'x', '-', '-', '-'],
+             ['-', 'o', '-', '-', '-', '-', '-', 'o'],
+             ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
+             ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
     def getTabuleiro(self):
         return self.tabuleiro
+
+    def setTabuleiro(self, tab):
+        self.tabuleiro = tab
 
     def nao_ha_movimento_obrigatorio(self,movs,i):
         return movs[i]==[]
