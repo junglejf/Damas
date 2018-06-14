@@ -46,14 +46,14 @@ class Jogo:
         self.jogadores = ('x', 'o')
         self.cedula_selecionada = None
         self.pulando = False
-        self.tabuleiro = [['-', '-', '-', '-', '-', '-', '-', '-'],
-             ['-', '-', '-', '-', '-', '-', '-', '-'],
-             ['x', '-', '-', '-', 'x', '-', 'x', '-'],
-             ['-', '-', '-', '-', '-', '-', '-', 'o'],
-             ['-', '-', '-', '-', 'x', '-', '-', '-'],
-             ['-', 'o', '-', '-', '-', '-', '-', 'o'],
-             ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
-             ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
+        self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
+						  ['-', 'x', '-', 'x', '-', 'x', '-', 'x'],
+						  ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
+						  ['-', '-', '-', '-', '-', '-', '-', '-'],
+						  ['-', '-', '-', '-', '-', '-', '-', '-'],
+						  ['-', 'o', '-', 'o', '-', 'o', '-', 'o'],
+						  ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
+						  ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
     def getTabuleiro(self):
         return self.tabuleiro
 
@@ -466,7 +466,8 @@ class Jogo:
                             break
                     conta_linha += 1
                     conta_coluna -= 1
-
+        if len(movimentos) == 0:
+            movimentos = [[]]
         return movimentos, pulos
 
         # VERIFICA O VENCEDOR
