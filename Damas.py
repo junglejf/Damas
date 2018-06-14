@@ -46,13 +46,13 @@ class Jogo:
         self.cedula_selecionada = None
         self.pulando = False
         self.tabuleiro = [['x', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', 'x', '-', 'x', '-', 'x', '-', 'x'],
+                          ['-', 'x', '-', '-', '-', '-', '-', 'x'],
                           ['x', '-', 'x', '-', 'x', '-', 'x', '-'],
-                          ['-', '-', '-', '-', '-', '-', '-', '-'],
-                          ['-', '-', '-', '-', '-', '-', '-', '-'],
-                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o'],
-                          ['o', '-', 'o', '-', 'o', '-', '-', '-'],
-                          ['-', 'o', '-', 'o', '-', 'o', '-', 'X']]
+                          ['-', '-', '-', '-', '-', '-', '-', 'o'],
+                          ['-', '-', '-', '-', 'x', '-', '-', '-'],
+                          ['-', 'o', '-', 'o', '-', '-', '-', 'o'],
+                          ['o', '-', 'o', '-', 'o', '-', 'o', '-'],
+                          ['-', 'o', '-', 'o', '-', 'o', '-', 'o']]
 
     def getTabuleiro(self):
         return self.tabuleiro
@@ -588,17 +588,17 @@ def fim_de_jogo(winner):
             if evento.type == pygame.KEYDOWN or evento.type == pygame.MOUSEBUTTONDOWN:
                 fim = True
 
-        tela.fill(AZUL)
-        fonte = pygame.font.SysFont('comicsansms', 50)
+        tela.fill(CORAL)
+        fonte = pygame.font.SysFont('comicsansms', 40)
 
         surface_texto, rect_texto = None, None
 
         if winner == "empate":
-            surface_texto, rect_texto = texto_na_tela("EMPATE!", fonte, BRANCO)
+            surface_texto, rect_texto = texto_na_tela("EMPATE !", fonte, BRANCO)
         elif winner == "x":
-            surface_texto, rect_texto = texto_na_tela("PRETO WINS", fonte, PRETO)
+            surface_texto, rect_texto = texto_na_tela("CPU VENCEU O JOGO", fonte, PRETO)
         elif winner == "o":
-            surface_texto, rect_texto = texto_na_tela("BRANCO WINS", fonte, BRANCO)
+            surface_texto, rect_texto = texto_na_tela("PARABÉNS VOCÊ GANHOU!!", fonte, BRANCO)
         rect_texto.center = ((LARGURA / 2), ALTURA / 3)
         tela.blit(surface_texto, rect_texto)
 
@@ -768,8 +768,9 @@ def IAsimples(jogo, vez):
                 jogo.estado = ('game over')
                 return jogo
             print('opcionais', opcionais)
-            linha_dest = opcionais[0][0][0]
-            coluna_dest = opcionais[0][0][1]
+            if({} not in opcionais):
+                linha_dest = opcionais[0][0][0]
+                coluna_dest = opcionais[0][0][1]
 
             y_origem = ALTURA / 8 * linha_origem
             x_origem = ALTURA / 8 * coluna_origem
