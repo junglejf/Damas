@@ -20,6 +20,7 @@ Jogo de Damas para python com pygame
   
   # Apresentação3f = slides da 3ª apresentação 
   
+  # Adicionado Perfil dos usuários do teste de aceitação
   
   
   
