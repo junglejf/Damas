@@ -22,7 +22,7 @@ Jogo de Damas para python com pygame
   
   # Adicionado Perfil dos usuários do teste de aceitação
   
-  # Teste de unidade na função verifica_vencedor()
+  # Teste de unidade na função verifica_vencedor, movimento obrigatório e se realiza movimento sequencial
     - O teste foi baseado em cenários
    
   
