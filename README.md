@@ -25,6 +25,11 @@ Jogo de Damas para python com pygame
   # Teste de unidade na função verifica_vencedor, movimento obrigatório e se realiza movimento sequencial
     - O teste foi baseado em cenários
    
+  #participação
   
+- Felipe José Perpétuo Assad - 35.5%
+- Henrique Nunes Duque de Medeiros - 14.66%
+- Jorge Felipe Campos Chagas - 35.5%
+- Pedro Paulo Bastos Teixeira - 14.34%
 
 
